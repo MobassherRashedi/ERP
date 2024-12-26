@@ -1,0 +1,157 @@
+﻿@model DevSkill.Inventory.Web.Areas.Admin.Models.StockAdjustmentUpdateModel
+@{
+    ViewData["Title"] = "Update Stock Adjustment";
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/adminlte/css/customStyle.css">
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Update Stock Adjustment</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Stock Adjustments</a></li>
+                    <li class="breadcrumb-item active">Update</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="card">
+                    <!-- form start -->
+                    <form asp-antiforgery="true" asp-area="Admin" asp-controller="StockAdjustment" asp-action="Update" method="post">
+                        <input type="hidden" asp-for="Id" /> <!-- Hidden field for the Id -->
+
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Product Information Display (Title) -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Product</label>
+                                        <p>@Model.ProductTitle</p> <!-- Display Product Title -->
+                                        <input type="hidden" asp-for="ProductId" value="@Model.ProductId" />
+                                    </div>
+                                </div>
+
+                                <!-- Warehouse Information Display (Name) -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Warehouse</label>
+                                        <p>@Model.WarehouseName</p> <!-- Display Warehouse Name -->
+                                        <input type="hidden" asp-for="WarehouseId" value="@Model.WarehouseId" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Current Quantity -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label>Current Quantity</label>
+                                        <input type="text" class="form-control" id="currentQuantity" readonly />
+                                    </div>
+                                </div>
+                                <!-- Quantity Adjusted -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label asp-for="QuantityAdjusted"></label>
+                                        <input type="number" asp-for="QuantityAdjusted" class="form-control" placeholder="Enter Quantity" />
+                                        <span asp-validation-for="QuantityAdjusted" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <!-- Low Stock Threshold -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label asp-for="LowStockThreshold"></label>
+                                        <input type="number" asp-for="LowStockThreshold" class="form-control" placeholder="Enter Low Stock Threshold" />
+                                        <span asp-validation-for="LowStockThreshold" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <!-- Reason Dropdown -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label asp-for="Reason"></label>
+                                        <select asp-for="Reason" class="form-control">
+                                            <option value="">Select Reason</option>
+                                            @foreach (var reason in Enum.GetValues(typeof(DevSkill.Inventory.Domain.Entities.AdjustmentReason)))
+                                            {
+                                                <option value="@reason">@reason</option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="Reason" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    </form>
+
+
+                </div>
+                <!-- /.card -->
+            </div>
+            <!--/.col -->
+        </div>
+        <!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Get the selected ProductId and WarehouseId from the disabled dropdowns
+            var productId = $('#ProductId').val();  // Get selected productId
+            var warehouseId = $('#WarehouseId').val();  // Get selected warehouseId
+
+            if (productId && warehouseId) {
+                // Make the AJAX request to get product stock details
+                $.ajax({
+                    url: '/Admin/Warehouse/GetProductDetails',
+                    type: 'GET',
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    data: {
+                        warehouseId: warehouseId,
+                        productId: productId
+                    },
+                    success: function (response) {
+                        console.log("Response: ", response);
+                        if (response.success) {
+                            // Set the stock value to the currentQuantity field
+                            $('#currentQuantity').val(response.productDetails.stock);
+                        } else {
+                            $('#currentQuantity').val('');
+                            alert(response.message);
+                        }
+                    },
+                    error: function () {
+                        alert('Error retrieving product stock.');
+                    }
+                });
+            }
+        });
+
+    </script>
+
+
+}

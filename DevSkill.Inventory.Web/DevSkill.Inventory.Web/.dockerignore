@@ -1,0 +1,31 @@
+# Ignore the .NET build artifacts
+bin/
+obj/
+
+# Ignore user-specific files
+*.user
+*.suo
+*.vs
+.vscode/
+
+# Ignore logs and temporary files
+*.log
+tmp/
+*.tmp
+*.temp
+
+# Ignore project files that shouldn't be included in the image
+*.db
+*.md
+*.json
+*.yml
+*.yaml
+*.xml
+
+# Ignore Docker related files
+Dockerfile
+*.dockerignore
+
+# Ignore backup files
+*~
+*.bak

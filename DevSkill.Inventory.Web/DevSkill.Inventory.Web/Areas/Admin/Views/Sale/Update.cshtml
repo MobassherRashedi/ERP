@@ -1,0 +1,188 @@
+﻿@model SaleUpdateModel
+@{
+    ViewData["Title"] = "Update Sale";
+}
+@section Styles
+{
+    <link rel="stylesheet" href="~/adminlte/css/customStyle.css">
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Update Sale</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Sales</a></li>
+                    <li class="breadcrumb-item active">Update Sale</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col">
+                <!-- general form elements -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Update Sale</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <form asp-antiforgery="true" asp-area="Admin" asp-controller="Sale" asp-action="Update" method="post">
+                        <div class="card-body">
+                            <!-- Sale Id (Hidden) -->
+                            <input type="hidden" asp-for="Id" />
+
+                            <!-- Customer Name -->
+                            <div class="form-group">
+                                <label asp-for="CustomerName"></label>
+                                <input type="text" asp-for="CustomerName" class="form-control" />
+                                <span asp-validation-for="CustomerName" class="text-danger"></span>
+                            </div>
+
+                            <!-- Sale Date -->
+                            <div class="form-group">
+                                <label asp-for="Date"></label>
+                                <input type="date" asp-for="Date" class="form-control" />
+                                <span asp-validation-for="Date" class="text-danger"></span>
+                            </div>
+
+                            <!-- Total Amount -->
+                            <div class="form-group">
+                                <label asp-for="TotalAmount"></label>
+                                <input type="number" asp-for="TotalAmount" class="form-control" step="0.01" readonly />
+                                <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                            </div>
+
+                            <!-- Sale Items Table -->
+                            <div class="form-group">
+                                <label>Sale Items</label>
+                                <table class="table table-bordered" id="saleItemsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Price</th>
+                                            <th>Total Price</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < Model.Items.Count; i++)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <select name="Items[@i].ProductId" class="form-control">
+                                                        <option value="">Select Product</option>
+                                                        <!-- Populate product options dynamically -->
+                                                        <!-- Use the selected value -->
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input type="number" name="Items[@i].Quantity" class="form-control" min="1" value="@Model.Items[i].Quantity" />
+                                                </td>
+                                                <td>
+                                                    <input type="number" name="Items[@i].UnitPrice" class="form-control" step="0.01" value="@Model.Items[i].UnitPrice" />
+                                                </td>
+                                                <td>
+                                                    <span class="totalPrice">@Model.Items[i].Quantity * Model.Items[i].UnitPrice</span>
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger remove-item">Remove</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                                <button type="button" class="btn btn-success" id="addItem">Add Item</button>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Update Sale</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.card -->
+            </div>
+            <!--/.col (left) -->
+        </div>
+        <!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            let itemIndex = @Model.Items.Count;
+
+            // Add new item row
+            $('#addItem').click(function () {
+                const rowHtml = `
+                            <tr>
+                                <td>
+                                    <select name="Items[${itemIndex}].ProductId" class="form-control">
+                                        <option value="">Select Product</option>
+                                        <!-- Populate product options dynamically -->
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" name="Items[${itemIndex}].Quantity" class="form-control" min="1" value="1" />
+                                </td>
+                                <td>
+                                    <input type="number" name="Items[${itemIndex}].UnitPrice" class="form-control" step="0.01" value="0" />
+                                </td>
+                                <td>
+                                    <span class="totalPrice">0</span>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger remove-item">Remove</button>
+                                </td>
+                            </tr>
+                        `;
+                $('#saleItemsTable tbody').append(rowHtml);
+                itemIndex++;
+
+                // Update total price when quantity or unit price changes
+                $('input[name="Items[' + (itemIndex - 1) + '].Quantity"], input[name="Items[' + (itemIndex - 1) + '].UnitPrice"]').on('input', function () {
+                    updateTotalPrice();
+                });
+            });
+
+            // Remove item row
+            $(document).on('click', '.remove-item', function () {
+                $(this).closest('tr').remove();
+                updateTotalPrice();
+            });
+
+            // Update total price of the sale
+            function updateTotalPrice() {
+                let totalAmount = 0;
+                $('#saleItemsTable tbody tr').each(function () {
+                    const quantity = $(this).find('input[name*="Quantity"]').val();
+                    const unitPrice = $(this).find('input[name*="UnitPrice"]').val();
+                    const totalPrice = quantity * unitPrice;
+                    totalAmount += totalPrice;
+                    $(this).find('.totalPrice').text(totalPrice.toFixed(2));
+                });
+
+                // Update the total amount field
+                $('input[name="TotalAmount"]').val(totalAmount.toFixed(2));
+            }
+
+            // Initialize total price on page load
+            updateTotalPrice();
+        });
+    </script>
+}

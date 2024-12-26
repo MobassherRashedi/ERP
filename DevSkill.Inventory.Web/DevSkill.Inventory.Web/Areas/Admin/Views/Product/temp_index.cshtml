@@ -1,0 +1,367 @@
+﻿@model ProductModel
+@{
+    ViewData["Title"] = "All Products";
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css" />
+
+}
+
+@section Scripts
+{
+    <script src="~/adminlte/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/adminlte/plugins/jszip/jszip.min.js"></script>
+    <script src="~/adminlte/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="~/adminlte/plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="~/adminlte/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js"></script>
+    <script>
+        $(function () {
+            // Initialize date pickers
+            $('#createDateFrom').datetimepicker({
+                format: 'YYYY-MM-DD'
+            });
+            $('#createDateTo').datetimepicker({
+                format: 'YYYY-MM-DD',
+                useCurrent: false // Important! See issue #1075
+            });
+
+            $("#createDateFrom").on("change.datetimepicker", function (e) {
+                $('#createDateTo').datetimepicker('minDate', e.date);
+            });
+
+            $("#createDateTo").on("change.datetimepicker", function (e) {
+                $('#createDateFrom').datetimepicker('maxDate', e.date);
+            });
+
+            // Initialize DataTable
+            var table = $("#products").DataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                lengthChange: false, // Disable items per page dropdown
+                autoWidth: false,
+                ajax: {
+                    url: "/Admin/Product/GetProductsJsonData",
+                    type: "POST",
+                    contentType: "application/json",
+                    dataType: "json",
+                    data: function (d) {
+                        d.SearchItem = {
+                            Title: $("#SearchItem_Title").val(),
+                            CategoryId: $("#SearchItem_CategoryId").val(),
+                            CreateDateFrom: $("#SearchItem_CreateDateFrom").val(),
+                            CreateDateTo: $("#SearchItem_CreateDateTo").val()
+                        };
+                        return JSON.stringify(d);
+                    },
+                    dataSrc: function (json) {
+                        console.log("json=================json");
+                        console.log(json);
+                        console.log("json=================json");
+                        return json.data; // Ensure it matches the response structure
+                    }
+                },
+                columnDefs: [
+                    {
+                        targets: 0, // Checkbox column
+                        orderable: false,
+                        render: function (data, type, row) {
+                            return `<input type="checkbox" class="select-checkbox" value="${row.Id}">`;
+                        }
+                    },
+                    {
+                        orderable: false,
+                        targets: 6,
+                        render: function (data, type, row) {
+                            return `<button type="submit" class="btn btn-info btn-sm" onclick="window.location.href='/admin/product/update/${row.Id}'" value='${row.Id}'>
+                                                        <i class="fas fa-pencil-alt"></i> Edit
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger btn-sm delete-btn" data-id='${row.Id}' value='${row.Id}'>
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </button>`;
+                        }
+                    }
+                ],
+                dom: '<"row"<"col-sm-12 col-md-6"lB>>' +  // Removed "f" to hide the search field
+                    '<"row"<"col-sm-12"tr>>' +
+                    '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+
+                buttons: [
+                    {
+                        extend: 'copy',
+                        text: 'Copy',
+                        className: 'dropdown-item', // Apply the dropdown item class
+                        // Other options if needed
+                    },
+                    {
+                        extend: 'csv',
+                        text: 'CSV',
+                        className: 'dropdown-item',
+                    },
+                    {
+                        extend: 'excel',
+                        text: 'Excel',
+                        className: 'dropdown-item',
+                    },
+                    {
+                        extend: 'pdf',
+                        text: 'PDF',
+                        className: 'dropdown-item',
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        className: 'dropdown-item',
+                    },
+                    {
+                        extend: 'colvis',
+                        text: 'Column Visibility',
+                        className: 'dropdown-item',
+                    },
+                ],
+
+            });
+
+            // Append DataTable buttons to dropdown
+            table.buttons().container().appendTo('#dataTableExport .dropdown-menu');
+            // Move DataTable buttons to dropdown
+            table.buttons().container().appendTo('#dataTableExport');
+            // Modal for delete action
+            $('#products').on('click', '.show-bs-modal', function (event) {
+                let id = $(this).data("id");
+                let modal = $("#modal-default");
+                modal.find('.modal-body p').text('Are you sure you want to delete this record?');
+                $("#deleteId").val(id);
+                $("#deleteForm").attr("action", "/admin/product/delete");
+                modal.modal('show');
+            });
+
+            $("#deleteButton").click(function () {
+                $("#deleteForm").submit();
+            });
+
+            // Reload DataTable on search button click
+            $("#searchButton").click(function () {
+                let newUrl = "/Admin/Product/GetProductsJsonDataAdvanceSearch";
+                table.ajax.url(newUrl).load();
+                table.ajax.reload(null, false);
+            });
+
+            // Handle bulk selection
+            $('#select-all').on('click', function () {
+                var rows = table.rows({ 'search': 'applied' }).nodes();
+                $('input[type="checkbox"]', rows).prop('checked', this.checked);
+            });
+
+            // Bulk delete
+            $('#bulkDeleteButton').on('click', function () {
+                var selectedIds = [];
+                $(".select-checkbox:checked").each(function () {
+                    selectedIds.push($(this).val());
+                });
+
+                if (selectedIds.length > 0) {
+                    $('#bulkDeleteModal').modal('show'); // Show modal
+                } else {
+                    alert('Please select at least one product.');
+                }
+            });
+
+            // Confirm Bulk Delete
+            $('#confirmBulkDelete').on('click', function () {
+                var selectedIds = [];
+                $(".select-checkbox:checked").each(function () {
+                    selectedIds.push($(this).val());
+                });
+
+                $.ajax({
+                    url: '/Admin/Product/BulkDelete',
+                    type: 'POST',
+                    data: { ids: selectedIds },
+                    success: function (response) {
+                        table.ajax.reload();
+                        $('#bulkDeleteModal').modal('hide');
+                    }
+                });
+            });
+        });
+    </script>
+
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>All Products</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">All Products</li>
+                </ol>
+            </div>
+        </div>
+        <hr class="my-2 hr-line">
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="search-filter">
+                    <div class="filter-body">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <input type="text" asp-for="SearchItem.Title" class="form-control" placeholder="Title" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <select asp-for="SearchItem.CategoryId" asp-items="Model.Categories ?? new List<SelectListItem>()" class="form-control">
+                                        <option value="" disabled selected>Select a Category</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <div class="input-group date" id="createDateFrom" data-target-input="nearest">
+                                        <input type="text" asp-for="SearchItem.CreateDateFrom" class="form-control datetimepicker-input" data-target="#createDateFrom" placeholder="Create Date From" />
+                                        <div class="input-group-append" data-target="#createDateFrom" data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <div class="input-group date" id="createDateTo" data-target-input="nearest">
+                                        <input type="text" asp-for="SearchItem.CreateDateTo" class="form-control datetimepicker-input" data-target="#createDateTo" placeholder="Create Date To" />
+                                        <div class="input-group-append" data-target="#createDateTo" data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-9 col-md-10"></div> <!-- Empty column to push the button right -->
+                            <div class="col-sm-3 col-md-2">
+                                <div class="form-group">
+                                    <button id="searchButton" type="submit" class="btn btn-info btn-block">Search</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.row -->
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">All available products</h3>
+                        <div class="card-tools">
+                            <a href="@Url.Action("Create", "Product")" class="btn btn-info btn-sm">
+                                <i class="fas fa-plus"></i> New
+                            </a>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    Export <i class="fas fa-cog"></i>
+                                </button>
+                                <div id="dataTableExport" class="dropdown-menu" role="menu">
+                                    <!-- DataTable buttons will be appended here dynamically -->
+                                </div>
+                            </div>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    Show <span class="items-count">10</span>
+                                </button>
+                                <div class="dropdown-menu" role="menu">
+                                    <a class="dropdown-item" href="#" onclick="$('#products').DataTable().page.len(10).draw(); $('.items-count').text('10');">10</a>
+                                    <a class="dropdown-item" href="#" onclick="$('#products').DataTable().page.len(25).draw(); $('.items-count').text('25');">25</a>
+                                    <a class="dropdown-item" href="#" onclick="$('#products').DataTable().page.len(50).draw(); $('.items-count').text('50');">50</a>
+                                    <a class="dropdown-item" href="#" onclick="$('#products').DataTable().page.len(-1).draw(); $('.items-count').text('All');">All</a>
+                                </div>
+                            </div>
+                            <div class="btn-group">
+                                <a id="bulkDeleteButton" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Bulk Delete
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <partial name="_ResponsePartial" />
+                        <partial name="_ModalPartial" />
+                        <table id="products" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="select-all"></th>
+                                    <th>Title</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Category</th>
+                                    <th>Created Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+<!-- Bulk Delete Modal -->
+<div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkDeleteModalLabel">Confirm Bulk Delete</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the selected products?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmBulkDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>

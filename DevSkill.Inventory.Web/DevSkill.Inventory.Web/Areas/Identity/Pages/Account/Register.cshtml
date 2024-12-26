@@ -1,0 +1,125 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<head>
+
+    <title>@ViewData["Title"]</title>
+
+    <!-- Custom CSS -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #ecf0f3;
+        }
+
+        .wrapper {
+            max-width: 350px;
+            min-height: 500px;
+            margin: 80px auto;
+            padding: 40px 30px;
+            background-color: #ecf0f3;
+            border-radius: 15px;
+            box-shadow: 13px 13px 20px #cbced1, -13px -13px 20px #fff;
+        }
+
+        .name {
+            font-weight: 600;
+            font-size: 1.4rem;
+            letter-spacing: 1.3px;
+            padding-left: 10px;
+            color: #555;
+            text-align: center;
+        }
+
+        .form-field {
+            margin-bottom: 20px;
+            border-radius: 20px;
+            box-shadow: inset 8px 8px 8px #cbced1, inset -8px -8px 8px #fff;
+        }
+
+        .form-control {
+            border: none;
+            background: none;
+            font-size: 1.2rem;
+            color: #666;
+            padding: 10px;
+        }
+
+        .btn {
+            box-shadow: none;
+            width: 100%;
+            height: 40px;
+            background-color: #03A9F4;
+            color: #fff;
+            border-radius: 25px;
+            letter-spacing: 1.3px;
+        }
+
+        .btn:hover {
+            background-color: #039BE5;
+        }
+
+        .form-group .text-danger {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="text-center mt-4 name">
+            Register
+        </div>
+        <form asp-route-returnUrl="@Model.ReturnUrl" method="post" class="p-3 mt-3">
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="form-field form-group">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="far fa-envelope"></i></span>
+                    </div>
+                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Email" />
+                </div>
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-field form-group">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                    </div>
+                    <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Password" />
+                </div>
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-field form-group">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                    </div>
+                    <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Confirm Password" />
+                </div>
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block mt-3">Register</button>
+        </form>
+
+        <div class="text-center fs-6 mt-3">
+            <a href="#">Forget password?</a> or <a href="#">Sign up</a>
+        </div>
+    </div>
+
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
+</body>

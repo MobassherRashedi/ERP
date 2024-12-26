@@ -1,0 +1,183 @@
+﻿@model StockAdjustmentCreateModel
+@{
+    ViewData["Title"] = "Create Stock Adjustment";
+}
+
+@section Styles
+{
+    <!-- Include Select2 CSS (in the <head> section) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/adminlte/css/customStyle.css">
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Create Stock Adjustment</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Stock Adjustments</a></li>
+                    <li class="breadcrumb-item active">Create</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <form asp-antiforgery="true" asp-area="Admin" asp-controller="StockAdjustment" asp-action="Create" method="post">
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Warehouse Dropdown -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label asp-for="WarehouseId"></label>
+                                        <select asp-for="WarehouseId" class="form-control" id="warehouseDropdown" required>
+                                            <option value="">Select a Warehouse</option>
+                                            @foreach (var warehouse in Model.Warehouses)
+                                            {
+                                                <option value="@warehouse.Value">@warehouse.Text</option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="WarehouseId" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Product Dropdown -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label asp-for="ProductId"></label>
+                                        <select asp-for="ProductId" class="form-control select2" id="productDropdown" required>
+                                            <option value="">Select a Product</option>
+                                        </select>
+                                        <span asp-validation-for="ProductId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Current Stock -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label>Current Stock</label>
+                                        <input type="text" class="form-control" id="currentStock" readonly />
+                                    </div>
+                                </div>
+                                <!-- Low Stock Threshold -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label asp-for="LowStockThreshold"></label>
+                                        <input type="number" asp-for="LowStockThreshold" class="form-control" id="LowStockThreshold" placeholder="Enter Low Stock Threshold" />
+                                        <span asp-validation-for="LowStockThreshold" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Quantity Adjusted -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label asp-for="QuantityAdjusted"></label>
+                                        <input type="number" asp-for="QuantityAdjusted" class="form-control" placeholder="Enter Quantity" />
+                                        <span asp-validation-for="QuantityAdjusted" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <!-- Reason Dropdown -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label asp-for="Reason"></label>
+                                        <select asp-for="Reason" class="form-control">
+                                            <option value="">Select Reason</option>
+                                            @foreach (var reason in Enum.GetValues(typeof(DevSkill.Inventory.Domain.Entities.AdjustmentReason)))
+                                            {
+                                                <option value="@reason">@reason</option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="Reason" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts
+{
+    <!-- Include Select2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            // Initialize Select2 for the Product dropdown
+            $('#productDropdown').select2();
+
+            // Handle Warehouse selection
+            $('#warehouseDropdown').on('change', function () {
+                var warehouseId = $(this).val();
+                console.log('Selected Warehouse ID:', warehouseId);
+
+                // Clear and reset the Product dropdown
+                $('#productDropdown').empty().append('<option value="">Select a Product</option>');
+
+                if (warehouseId) {
+                    // Fetch products for the selected warehouse
+                    $.ajax({
+                        url: '/admin/Warehouse/GetWarehouseProducts',
+                        type: 'GET',
+                        data: { warehouseId: warehouseId },
+                        success: function (data) {
+                            if (data.success) {
+                                // Populate the Product dropdown
+                                $.each(data.warehouseProducts, function (index, product) {
+                                    $('#productDropdown').append(
+                                        $('<option>', {
+                                            value: product.productId,
+                                            text: product.productTitle,
+                                            'data-stock': product.stock,
+                                            'data-lowstockthreshold': product.lowStockThreshold
+                                        })
+                                    );
+                                });
+                            } else {
+                                alert(data.message || 'Failed to load products.');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error fetching products:', error);
+                            alert('An error occurred while fetching products.');
+                        }
+                    });
+                }
+            });
+
+            // Handle Product selection
+            $('#productDropdown').on('change', function () {
+                var selectedOption = $(this).find(':selected');
+                var stock = selectedOption.data('stock');
+                var lowStockThreshold = selectedOption.data('lowstockthreshold');
+
+                console.log('Selected Product Stock:', stock);
+                console.log('Selected Product LowStockThreshold:', lowStockThreshold);
+
+                // Populate the Current Stock field
+                $('#currentStock').val(stock || '');
+                $('#LowStockThreshold').val(lowStockThreshold || '');
+            });
+        });
+    </script>
+}

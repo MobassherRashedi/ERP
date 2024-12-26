@@ -1,0 +1,168 @@
+﻿@model DevSkill.Inventory.Web.Areas.Admin.Models.StockTransferUpdateModel
+@{
+    ViewData["Title"] = "Update Stock Transfer";
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/adminlte/css/customStyle.css">
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Update Stock Transfer</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a asp-action="Index" asp-controller="StockTransfer">Stock Transfers</a></li>
+                    <li class="breadcrumb-item active">Update</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="card">
+                    <!-- form start -->
+                    <form id="stockTransferForm" method="post">
+                        <input type="hidden" asp-for="Id" /> <!-- Hidden field for the transfer ID -->
+
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- From Warehouse -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label asp-for="FromWarehouseId"></label>
+                                        <select asp-for="FromWarehouseId" class="form-control" asp-items="Model.Warehouses">
+                                            <option value="">Select Source Warehouse</option>
+                                        </select>
+                                        <span asp-validation-for="FromWarehouseId" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- To Warehouse -->
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label asp-for="ToWarehouseId"></label>
+                                        <select asp-for="ToWarehouseId" class="form-control" asp-items="Model.Warehouses">
+                                            <option value="">Select Destination Warehouse</option>
+                                        </select>
+                                        <span asp-validation-for="ToWarehouseId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Products -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @for (int i = 0; i < Model.Products.Count; i++)
+                                    {
+                                        <div class="form-group row">
+                                            <!-- Hidden field for ProductId -->
+                                            <input type="hidden" asp-for="Products[@i].ProductId" />
+
+                                            <!-- Display Product Title -->
+                                            <div class="col-md-4">
+                                                <label for="productTitle_@i" class="form-label">Product Title</label>
+                                                <div>@Model.Products[i].ProductTitle</div> <!-- Display Product Title -->
+                                            </div>
+
+                                            <!-- Display Transferred Quantity -->
+                                            <div class="col-md-4">
+                                                <label for="transferredQuantity_@i" class="form-label">Transferred Quantity</label>
+                                                <div>@Model.Products[i].Quantity</div> <!-- Display Transferred Quantity -->
+                                            </div>
+
+                                            <!-- Input field for New Quantity (if needed to adjust) -->
+                                            <div class="col-md-4">
+                                                <label>New Quantity</label>
+                                                <input asp-for="Products[@i].Quantity" class="form-control" />
+                                                <span asp-validation-for="Products[@i].Quantity" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <span asp-validation-for="Products" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Handle form submission via AJAX
+            $("#stockTransferForm").submit(function (event) {
+                event.preventDefault(); // Prevent traditional form submission
+
+                // Collect form data into a JavaScript object
+                var formData = {
+                    Id: $("input[name='Id']").val(),
+                    FromWarehouseId: $("select[name='FromWarehouseId']").val(),
+                    ToWarehouseId: $("select[name='ToWarehouseId']").val(),
+                    Products: [] // Array to hold product data
+                };
+
+                // Loop through the products and collect data
+                $("#stockTransferForm .form-group").each(function () {
+                    var product = {
+                        ProductId: $(this).find("input[name$='ProductId']").val(),
+                        Quantity: $(this).find("input[name$='Quantity']").val()
+                    };
+                    formData.Products.push(product);
+                });
+
+                // Convert the object to a JSON string
+                var jsonData = JSON.stringify(formData);
+
+                // Make the AJAX request
+                $.ajax({
+                    url: '@Url.Action("UpdateJson", "StockTransfer", new { area = "Admin" })', // Your controller action URL
+                    type: 'POST',
+                    contentType: 'application/json', // Sending JSON
+                    data: jsonData, // Send JSON data
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() // Send the CSRF token
+                    },
+                    success: function (response) {
+                        // Handle success (e.g., show success message or redirect)
+                        if (response.success) {
+                            alert('Stock transfer updated successfully.');
+                            window.location.href = '@Url.Action("Index", "StockTransfer", new { area = "Admin" })'; // Redirect to index page
+                        } else {
+                            alert('Error: ' + response.errorMessage); // Show error message
+                        }
+                    },
+                    error: function () {
+                        // Handle error (AJAX failure)
+                        alert('There was an error processing your request. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+}

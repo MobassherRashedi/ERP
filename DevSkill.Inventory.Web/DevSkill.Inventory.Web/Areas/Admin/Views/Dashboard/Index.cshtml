@@ -1,0 +1,541 @@
+﻿@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<!-- /.content-header -->
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
+        <div class="row mb-2">
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box">
+                    <div class="icon">
+                        <i class="ion ion-bag"></i>
+                    </div>
+                    <div class="inner">
+                        <p>Total Products</p>
+                        <h3>@Model.TotalProducts</h3>
+                    </div>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box">
+                    <div class="icon">
+                        <i class="ion ion-stats-bars"></i>
+                    </div>
+                    <div class="inner">
+                        <p>Low Stock</p>
+                        <h3>@Model.LowStockCount</h3>
+                    </div>
+
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box">
+                    <div class="icon">
+                        <i class="ion ion-pie-graph"></i>
+                    </div>
+                    <div class="inner">
+                        <p>Warehouse</p>
+                        <h3>@Model.NotAvailableCount</h3>
+                    </div>
+
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box">
+                    <div class="icon">
+                        <i class="ion ion-person-add"></i>
+                    </div>
+                    <div class="inner">
+                        <p>Users</p>
+                        <h3>@Model.TotalUserCount</h3>
+                    </div>
+                </div>
+            </div>
+            <!-- ./col -->
+
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-sm-12 col-md-12 col-lg-8 pr-3">
+                <!-- Add margin-right for gap -->
+                <div class="card mb-30">
+                    <div class="card-body">
+                        <h4 class="card-title m-0">This Week Sales & Purchases</h4>
+                        <div class="chart-wrapper">
+                            <div id="sales-purchases-chart" class="echarts"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-4">
+                <!-- Add margin-left for gap -->
+                <div class="card mb-30">
+                    <div class="card-body">
+                        <h4 class="card-title m-0">Top Selling Products (2024)</h4>
+                        <div class="chart-wrapper">
+                            <div id="top-products-chart" class="echarts"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-md-8 pr-3">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title border-bottom p-3 mb-2">Stock Alert</h5>
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table id="stock_alert_table" class="table table-hover mb-3">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Code</th>
+                                        <th scope="col">Product</th>
+                                        <th scope="col">Warehouse</th>
+                                        <th scope="col">Quantity</th>
+                                        <th scope="col">Alert Quantity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data rows will be inserted here using JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title border-bottom p-3 mb-2">Top Selling Products (November)</h5>
+                        <div class="vgt-wrap ">
+                            <!---->
+                            <div class="vgt-inner-wrap">
+                                <!----> <!----> <!---->
+                                <div class="vgt-fixed-header">
+                                    <!---->
+                                </div>
+                                <div class="vgt-responsive">
+                                    <table id="vgt-table" class="order-table vgt-table ">
+                                        <colgroup>
+                                            <col id="col-0">
+                                            <col id="col-1">
+                                            <col id="col-2">
+                                        </colgroup>
+                                        <thead>
+                                            <tr>
+                                                <!----> <!---->
+                                                <th scope="col" aria-sort="descending" aria-controls="col-0" class="vgt-left-align text-left" style="min-width: auto; width: auto;">
+                                                    <span>Product</span> <!---->
+                                                </th>
+                                                <th scope="col" aria-sort="descending" aria-controls="col-1" class="vgt-left-align text-left" style="min-width: auto; width: auto;">
+                                                    <span>Total Sales</span> <!---->
+                                                </th>
+                                                <th scope="col" aria-sort="descending" aria-controls="col-2" class="vgt-left-align text-left" style="min-width: auto; width: auto;">
+                                                    <span>Total Amount</span> <!---->
+                                                </th>
+                                            </tr>
+                                            <!---->
+                                        </thead>
+                                        <tbody>
+                                            <!---->
+                                            <tr class=" text-left">
+                                                <!----> <!---->
+                                                <td class="vgt-left-align text-left">
+                                                    <span>
+                                                        Macbook pro
+                                                    </span>
+                                                </td>
+                                                <td class="vgt-left-align text-left">
+                                                    <span>
+                                                        4
+                                                    </span>
+                                                </td>
+                                                <td class="vgt-left-align text-left">
+                                                    <div><span>$ 6000.00</span></div>
+                                                </td>
+                                            </tr>
+                                            <tr class=" text-left">
+                                                <!----> <!---->
+                                                <td class="vgt-left-align text-left">
+                                                    <span>
+                                                        sunglasses
+                                                    </span>
+                                                </td>
+                                                <td class="vgt-left-align text-left">
+                                                    <span>
+                                                        4
+                                                    </span>
+                                                </td>
+                                                <td class="vgt-left-align text-left">
+                                                    <div><span>$ 1360.00</span></div>
+                                                </td>
+                                            </tr>
+                                            <tr class=" text-left">
+                                                <!----> <!---->
+                                                <td class="vgt-left-align text-left">
+                                                    <span>
+                                                        earphones
+                                                    </span>
+                                                </td>
+                                                <td class="vgt-left-align text-left">
+                                                    <span>
+                                                        3
+                                                    </span>
+                                                </td>
+                                                <td class="vgt-left-align text-left">
+                                                    <div><span>$ 956.00</span></div>
+                                                </td>
+                                            </tr>
+                                            <tr class=" text-left">
+                                                <!----> <!---->
+                                                <td class="vgt-left-align text-left">
+                                                    <span>
+                                                        Banana
+                                                    </span>
+                                                </td>
+                                                <td class="vgt-left-align text-left">
+                                                    <span>
+                                                        2
+                                                    </span>
+                                                </td>
+                                                <td class="vgt-left-align text-left">
+                                                    <div><span>$ 546.00</span></div>
+                                                </td>
+                                            </tr>
+                                            <tr class=" text-left">
+                                                <!----> <!---->
+                                                <td class="vgt-left-align text-left">
+                                                    <span>
+                                                        Strawberry
+                                                    </span>
+                                                </td>
+                                                <td class="vgt-left-align text-left">
+                                                    <span>
+                                                        2
+                                                    </span>
+                                                </td>
+                                                <td class="vgt-left-align text-left">
+                                                    <div><span>$ 480.00</span></div>
+                                                </td>
+                                            </tr>
+                                            <!---->
+                                        </tbody>
+                                        <!---->
+                                    </table>
+                                </div>
+                                <!----> <!---->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="row mb-2">
+            <div class="col-12">
+            <div class="card">
+                <div class="card-header border-transparent">
+                    <h3 class="card-title">Latest Orders</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="remove">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table m-0">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Item</th>
+                                    <th>Status</th>
+                                    <th>Popularity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><a href="pages/examples/invoice.html">OR9842</a></td>
+                                    <td>Call of Duty IV</td>
+                                    <td><span class="badge badge-success">Shipped</span></td>
+                                    <td>
+                                        <div class="sparkbar" data-color="#00a65a" data-height="20">90,80,90,-70,61,-83,63</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><a href="pages/examples/invoice.html">OR1848</a></td>
+                                    <td>Samsung Smart TV</td>
+                                    <td><span class="badge badge-warning">Pending</span></td>
+                                    <td>
+                                        <div class="sparkbar" data-color="#f39c12" data-height="20">90,80,-90,70,61,-83,68</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><a href="pages/examples/invoice.html">OR7429</a></td>
+                                    <td>iPhone 6 Plus</td>
+                                    <td><span class="badge badge-danger">Delivered</span></td>
+                                    <td>
+                                        <div class="sparkbar" data-color="#f56954" data-height="20">90,-80,90,70,-61,83,63</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><a href="pages/examples/invoice.html">OR7429</a></td>
+                                    <td>Samsung Smart TV</td>
+                                    <td><span class="badge badge-info">Processing</span></td>
+                                    <td>
+                                        <div class="sparkbar" data-color="#00c0ef" data-height="20">90,80,-90,70,-61,83,63</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><a href="pages/examples/invoice.html">OR1848</a></td>
+                                    <td>Samsung Smart TV</td>
+                                    <td><span class="badge badge-warning">Pending</span></td>
+                                    <td>
+                                        <div class="sparkbar" data-color="#f39c12" data-height="20">90,80,-90,70,61,-83,68</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><a href="pages/examples/invoice.html">OR7429</a></td>
+                                    <td>iPhone 6 Plus</td>
+                                    <td><span class="badge badge-danger">Delivered</span></td>
+                                    <td>
+                                        <div class="sparkbar" data-color="#f56954" data-height="20">90,-80,90,70,-61,83,63</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><a href="pages/examples/invoice.html">OR9842</a></td>
+                                    <td>Call of Duty IV</td>
+                                    <td><span class="badge badge-success">Shipped</span></td>
+                                    <td>
+                                        <div class="sparkbar" data-color="#00a65a" data-height="20">90,80,90,-70,61,-83,63</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div class="card-footer clearfix">
+                    <a href="javascript:void(0)" class="btn btn-sm btn-info float-left">Place New Order</a>
+                    <a href="javascript:void(0)" class="btn btn-sm btn-secondary float-right">View All Orders</a>
+                </div>
+
+            </div>
+        </div>
+        </div>
+        <!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+<!-- Low Stock Products Modal -->
+<div class="modal fade" id="lowStockModal" tabindex="-1" role="dialog" aria-labelledby="lowStockModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lowStockModalLabel">Low Stock Products</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped" id="lowStockProductsTable">
+                    <thead>
+                        <tr>
+                            <th>Product Title</th>
+                            <th>Stock Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.LowStockProducts != null && Model.LowStockProducts.Any())
+                        {
+                            foreach (var product in Model.LowStockProducts)
+                            {
+                                <tr>
+                                    <td>@product.Title</td>
+                                    <td>@product.Stock</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center">No low stock products available.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Show modal if it's the user's first visit and there are low stock products
+        var isFirstVisit = @Html.Raw(Json.Serialize(ViewBag.IsFirstVisit));
+        var hasLowStockProducts = @Html.Raw(Json.Serialize(ViewBag.HasLowStockProducts));
+
+        if (isFirstVisit && hasLowStockProducts) {
+            $('#lowStockModal').modal('show');
+        }
+    });
+</script>
+
+<script>
+    // Initialize Sales & Purchases Chart with Bar Chart and Label Rotation
+    var salesPurchasesChart = echarts.init(document.getElementById('sales-purchases-chart'));
+    var salesPurchasesOption = {
+        tooltip: {
+            trigger: 'axis'
+        },
+        xAxis: {
+            type: 'category',
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            axisLabel: {
+                rotate: 45,  // Rotates labels by 45 degrees for better readability
+                fontSize: 12
+            }
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                name: 'Sales',
+                type: 'bar',
+                data: [1200, 2320, 3010, 1800, 2340, 3100, 2800],
+                color: '#8B5CF6',
+                barWidth: '40%',
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowColor: '#8B5CF6',
+                        shadowOffsetX: 0,
+                        shadowOffsetY: 5
+                    }
+                }
+            },
+            {
+                name: 'Purchases',
+                type: 'bar',
+                data: [2200, 1820, 1910, 2340, 2900, 3300, 3100],
+                color: '#8B5CF660',
+                barWidth: '40%',
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowColor: '#8B5CF660',
+                        shadowOffsetX: 0,
+                        shadowOffsetY: 5
+                    }
+                }
+            }
+        ],
+        legend: {
+            orient: 'horizontal',
+            top: 0,
+            right: 0,
+            align: 'right'
+        }
+    };
+    salesPurchasesChart.setOption(salesPurchasesOption);
+
+    // Handle window resize for responsive charts
+    window.addEventListener('resize', function () {
+        salesPurchasesChart.resize();
+    });
+</script>
+
+<script>
+    // Initialize Top Selling Products Chart
+    var topProductsChart = echarts.init(document.getElementById('top-products-chart'));
+    var topProductsOption = {
+        tooltip: {
+            trigger: 'item'
+        },
+        series: [
+            {
+                name: 'Products',
+                type: 'pie',
+                radius: '50%',
+                data: [
+                    { value: 1048, name: 'MacBook Pro', itemStyle: { color: '#8B5CF6' } },
+                    { value: 735, name: 'iPhone 13', itemStyle: { color: '#A78BFA' } },
+                    { value: 580, name: 'AirPods', itemStyle: { color: '#C4B5FD' } },
+                    { value: 484, name: 'iPad Pro', itemStyle: { color: '#D8B4FE' } },
+                    { value: 300, name: 'Apple Watch', itemStyle: { color: '#EDE9FE' } }
+                ],
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                },
+                label: {
+                    color: '#8B5CF6' // Sets the label color for data names
+                }
+            }
+        ]
+    };
+    topProductsChart.setOption(topProductsOption);
+
+    // Handle window resize for responsive charts
+    window.addEventListener('resize', function () {
+        topProductsChart.resize();
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Data array with stock alert information
+        const stockData = [
+            { code: '70171027', product: 'Banana', warehouse: 'Warehouse 2', quantity: 10, alertQuantity: 10 },
+            { code: '80256894', product: 'Orange', warehouse: 'Warehouse 1', quantity: 47, alertQuantity: 50 },
+            { code: '80256894', product: 'Orange', warehouse: 'Warehouse 2', quantity: 47, alertQuantity: 50 },
+            { code: '22112233443', product: 'Kacang Gajah duduk', warehouse: 'Warehouse 1', quantity: 0, alertQuantity: 200 },
+            { code: '22112233443', product: 'Kacang Gajah duduk', warehouse: 'Warehouse 1', quantity: 0, alertQuantity: 200 },
+            { code: '22112233443', product: 'Kacang Gajah duduk', warehouse: 'Warehouse 1', quantity: 0, alertQuantity: 200 },
+            { code: '22112233443', product: 'Kacang Gajah duduk', warehouse: 'Warehouse 1', quantity: 0, alertQuantity: 200 },
+            { code: '22112233443', product: 'Kacang Gajah duduk', warehouse: 'Warehouse 2', quantity: 0, alertQuantity: 200 }
+        ];
+
+        const tableBody = document.querySelector('#stock_alert_table tbody');
+
+        // Loop through the data and insert rows into the table
+        stockData.forEach(item => {
+            const row = document.createElement('tr');
+            row.classList.add('text-left');
+
+            row.innerHTML = `
+                    <td>${item.code}</td>
+                    <td>${item.product}</td>
+                    <td>${item.warehouse}</td>
+                    <td>${item.quantity}</td>
+                    <td><span class="badge badge-outline-danger">${item.alertQuantity}</span></td>
+                `;
+
+            tableBody.appendChild(row);
+        });
+    });
+</script>

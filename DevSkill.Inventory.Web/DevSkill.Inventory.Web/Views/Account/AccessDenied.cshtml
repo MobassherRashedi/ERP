@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<!-- Access Denied Page -->
+<section style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
+    <div style="text-align: center;">
+        <!-- Animated Lock Icon -->
+        <div style="font-size: 80px; color: #dc3545; margin-bottom: 20px;">
+            <i class="fas fa-lock animated-lock"></i>
+        </div>
+
+        <!-- Access Denied Heading -->
+        <h1 style="font-size: 48px; font-weight: bold; color: #dc3545;">Access Denied</h1>
+        
+        <!-- Explanation Text -->
+        <p style="font-size: 18px; color: #6c757d; margin-bottom: 30px;">
+            Oops! It looks like you don't have permission to access this page.
+        </p>
+
+        <!-- Return to Homepage Button -->
+        <a href="/" class="btn btn-danger" style="padding: 10px 20px; font-size: 18px;">Return to Homepage</a>
+    </div>
+</section>
+
+<!-- Inline CSS for animation -->
+<style>
+    .animated-lock {
+        animation: pulse 1.5s infinite ease-in-out;
+    }
+</style>

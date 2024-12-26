@@ -1,0 +1,197 @@
+﻿@model DevSkill.Inventory.Web.Areas.Admin.Models.StockTransferCreateModel
+
+@{
+    ViewData["Title"] = "Create Stock Transfer";
+}
+
+@section Styles
+{
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/adminlte/css/customStyle.css">
+}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Create Stock Transfer</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Stock Transfers</a></li>
+                    <li class="breadcrumb-item active">Create</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <form asp-antiforgery="true" asp-area="Admin" asp-controller="StockTransfer" asp-action="Create" method="post">
+                        <div class="card-body">
+                            <!-- Source and Destination Warehouses -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="FromWarehouseId"></label>
+                                        <select asp-for="FromWarehouseId" class="form-control" id="fromWarehouseDropdown" required>
+                                            <option value="">Select Source Warehouse</option>
+                                            @foreach (var warehouse in Model.Warehouses)
+                                            {
+                                                <option value="@warehouse.Value">@warehouse.Text</option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="FromWarehouseId" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="ToWarehouseId"></label>
+                                        <select asp-for="ToWarehouseId" class="form-control" id="toWarehouseDropdown" required>
+                                            <option value="">Select Destination Warehouse</option>
+                                            @foreach (var warehouse in Model.Warehouses)
+                                            {
+                                                <option value="@warehouse.Value">@warehouse.Text</option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="ToWarehouseId" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Products Section -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h6>Products</h6>
+                                    <div id="productsContainer">
+                                        <!-- Dynamic Product Rows Will Be Added Here -->
+                                    </div>
+                                    <button type="button" class="btn btn-success mt-2" id="addProductButton" disabled>Add Product</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts
+{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            let productIndex = 0;
+
+            // Function to check if Add Product button should be enabled
+            function checkAddProductButton() {
+                const fromWarehouseId = $('#fromWarehouseDropdown').val();
+                const toWarehouseId = $('#toWarehouseDropdown').val();
+
+                if (fromWarehouseId && toWarehouseId && fromWarehouseId !== toWarehouseId) {
+                    $('#addProductButton').prop('disabled', false);
+                    
+                } else {
+                    $('#addProductButton').prop('disabled', true);
+
+                    // Check if both warehouses are the same and not the default value
+                    if (fromWarehouseId === toWarehouseId && fromWarehouseId !== "" && toWarehouseId !== "") {
+                        alert('Source and destination warehouses cannot be the same.');
+                    }
+                }
+            }
+
+            // Reset products and check Add Product button when warehouse changes
+            $('#fromWarehouseDropdown, #toWarehouseDropdown').on('change', function () {
+                $('#productsContainer').empty(); // Clear product rows
+                checkAddProductButton(); // Recheck button state
+            });
+
+            // Add Product Button Click Handler
+            $('#addProductButton').on('click', function () {
+                const warehouseId = $('#fromWarehouseDropdown').val();
+
+                if (!warehouseId) {
+                    alert('Please select a Source Warehouse first.');
+                    return;
+                }
+
+                // Fetch available products dynamically
+                $.ajax({
+                    url: '/admin/Warehouse/GetWarehouseProducts',
+                    type: 'GET',
+                    data: { warehouseId: warehouseId },
+                    success: function (data) {
+                        if (data.success) {
+                            addProductRow(data.warehouseProducts);
+                        } else {
+                            alert(data.message || 'Failed to load products.');
+                        }
+                    },
+                    error: function () {
+                        alert('An error occurred while fetching products.');
+                    }
+                });
+            });
+
+            // Add a new product row
+            function addProductRow(products) {
+                const rowHtml = `
+                            <div class="row product-row mt-2" data-index="${productIndex}">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="Products_${productIndex}__ProductId">Product</label>
+                                        <select name="Products[${productIndex}].ProductId" class="form-control productDropdown" required>
+                                            <option value="">Select Product</option>
+                                            ${products.map(product => `<option value="${product.productId}" data-stock="${product.stock}">${product.productTitle}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="Products_${productIndex}__CurrentStock">Current Stock</label>
+                                        <input type="text" class="form-control current-stock-display" value="-" readonly />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="Products_${productIndex}__Quantity">Quantity</label>
+                                        <input name="Products[${productIndex}].Quantity" type="number" class="form-control" required min="1" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-danger mt-4 removeProductButton">Remove</button>
+                                </div>
+                            </div>`;
+                $('#productsContainer').append(rowHtml);
+                productIndex++;
+            }
+
+            // Update Current Stock Display on Product Selection
+            $(document).on('change', '.productDropdown', function () {
+                const stock = $(this).find(':selected').data('stock') || '-';
+                $(this).closest('.product-row').find('.current-stock-display').val(stock);
+            });
+
+            // Remove Product Row
+            $(document).on('click', '.removeProductButton', function () {
+                $(this).closest('.product-row').remove();
+            });
+
+            // Initial check for Add Product button
+            checkAddProductButton();
+        });
+    </script>
+}

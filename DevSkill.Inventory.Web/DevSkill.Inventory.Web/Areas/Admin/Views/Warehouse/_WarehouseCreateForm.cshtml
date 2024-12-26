@@ -1,0 +1,156 @@
+﻿@model DevSkill.Inventory.Web.Areas.Admin.Models.WarehouseCreateModel
+
+<form id="createWarehouseForm" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                <label for="createName">Warehouse Name</label>
+                <input type="text" id="createName" name="Name" class="form-control" required />
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                <label for="createAddress">Address</label>
+                <input type="text" id="createAddress" name="Address" class="form-control" required />
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                <label for="createPhoneNumber">Phone Number</label>
+                <input type="text" id="createPhoneNumber" name="PhoneNumber" class="form-control" required />
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                <label for="createEmail">Email</label>
+                <input type="email" id="createEmail" name="Email" class="form-control" required />
+            </div>
+        </div>
+
+       @*  <div class="col-md-6 mb-3">
+            <div class="form-group">
+                <label for="createProducts">Select Products</label>
+                <select id="createProducts" name="Products" class="form-control" multiple>
+                    @foreach (var product in Model.Products)
+                    {
+                        <option value="@product.Id" data-title="@product.Title" data-price="@product.Price" data-stock="@product.Stock">@product.Title</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="form-group">
+                <label>Selected Products</label>
+                <div id="selectedProducts" class="list-group"></div>
+            </div>
+        </div> *@
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+@* <script>
+    $(document).ready(function () {
+        $('#createProducts').on('change', function () {
+            var selectedProducts = $(this).val(); // Get all selected product IDs
+            $('#selectedProducts').empty(); // Clear the selected products list
+
+            // Loop through selected options and add them to the display div
+            $(this).find('option:selected').each(function () {
+                var productTitle = $(this).data('title');
+                var productId = $(this).val();
+                $('#selectedProducts').append('<div class="list-group-item">' + productTitle + ' <span class="badge badge-danger remove-product" data-id="' + productId + '">Remove</span></div>');
+            });
+        });
+
+        // Handle remove button click
+        $('#selectedProducts').on('click', '.remove-product', function () {
+            var productId = $(this).data('id');
+            $('#createProducts option[value="' + productId + '"]').prop('selected', false); // Deselect the option
+            $(this).parent().remove(); // Remove the item from the display list
+        });
+    });
+</script> *@
+
+@* <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> *@
+@* <script>
+    $(document).ready(function () {
+        // Intercept form submission
+        $('#createWarehouseForm').on('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Gather form data
+            var formData = $(this).serialize(); // Serialize form data into a query string
+
+            // Add CSRF token manually if required
+            var csrfToken = $('input[name="__RequestVerificationToken"]').val(); // Extract the token
+
+            // Add CSRF token to the form data if not already present
+            formData += '&__RequestVerificationToken=' + encodeURIComponent(csrfToken);
+
+            // Send AJAX request
+            $.ajax({
+                url: '/Admin/Warehouse/CreateJson', // Replace with the desired URL explicitly
+                method: 'POST', // Use the POST method explicitly
+                data: formData,
+                success: function (response) {
+                    // Close the modal
+                    $('#createWarehouseModal').modal('hide'); // Ensure the modal has an ID like `createWarehouseModal`
+
+                    // Redirect to the index page
+                    window.location.href = '/Admin/Warehouse/'; // Replace with your index page URL
+                },
+                error: function (xhr, status, error) {
+                    // Handle error
+                    alert('An error occurred: ' + error);
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+    });
+</script> *@
+<script>
+    $(document).ready(function () {
+        // Intercept form submission
+        $('#createWarehouseForm').on('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Serialize form data
+            var formData = $(this).serialize();
+
+            // Send AJAX request to create the warehouse
+            $.ajax({
+                url: '/Admin/Warehouse/CreateJson', // Your POST action URL
+                method: 'POST',
+                data: formData, // Send the serialized form data
+                success: function (response) {
+                    if (response.success) {
+                        // Hide the modal on success
+                        $('#createWarehouseModal').modal('hide');
+
+                        // Optionally reset the form
+                        $('#createWarehouseForm')[0].reset();
+
+                        // Reload DataTable or redirect as needed
+                        $('#warehouse').DataTable().ajax.reload(); // Reload the table if necessary
+
+                        // Optionally redirect to another page
+                        // window.location.href = '/Admin/Warehouse/Index';
+                    } else {
+                        alert(response.message); // Show error message if not successful
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('An error occurred: ' + error);
+                }
+            });
+        });
+    });
+</script>
+

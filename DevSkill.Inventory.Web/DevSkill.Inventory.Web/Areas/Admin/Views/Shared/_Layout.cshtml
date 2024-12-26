@@ -1,0 +1,466 @@
+﻿@using DevSkill.Inventory.Infrastructure.Identity
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiforgery
+
+@{
+    var iconPath = Url.Content("~/adminlte/svg/icons.svg");
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ERP Dashboard</title>
+
+    <!-- Include Google Fonts directly in the head -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts for a clean professional look -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="~/adminlte/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Minimalist AdminLTE style -->
+    <link rel="stylesheet" href="~/adminlte/css/adminlte.min.css">
+    <link rel="stylesheet" href="~/adminlte/css/customStyle.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tagify/4.8.0/tagify.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+    <!-- Barcode -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+    <!-- Custom Professional Styling -->
+    @await RenderSectionAsync("Styles", false)
+</head>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
+    <div class="wrapper">
+
+        <!-- Preloader -->
+        <div class="preloader flex-column justify-content-center align-items-center">
+            <img class="animation__shake" src="~/adminlte/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
+        </div>
+
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-light layout-fixed layout-navbar-fixed ">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="#" class="nav-link">Contact</a>
+                </li>
+            </ul>
+
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /.navbar -->
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-light-secondary elevation-1">
+            <!-- Brand Logo -->
+            <a href="#" class="brand-link">
+                <img src="~/adminlte/img/AdminLTELogo.png" alt="ERP Logo" class="brand-image img-circle elevation-2 brand-image-custom" style="opacity: .8">
+                <span class="brand-text font-weight-bold">ERP</span>
+            </a>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Sidebar user panel -->
+               @if (SignInManager.IsSignedIn(User))
+                {
+                    var user = await UserManager.GetUserAsync(User); // Get the current user
+
+                    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                        <div class="image">
+                            <img id="userProfilePic"
+                                  src="@(!string.IsNullOrEmpty(user.ProfilePicture) ? user.ProfilePicture : Url.Content("~/images/user/user_default.jpg"))".
+
+                                 +
+                                 class="img-circle elevation-2"
+                                 alt="User Image">
+                        </div>
+                        <div class="info">
+                            <a class="d-block bg-light bg-light-custom"
+                               asp-area=""
+                               asp-controller="Account"
+                               asp-action="Profile" 
+                               title="View Profile"
+                               style="font-size: 1rem; font-weight: 400; color: #c2c7d0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                @user.FullName @* Use the FullName property *@
+                            </a>
+                        </div>
+                    </div>
+                }
+
+
+
+                <!-- Sidebar Menu -->
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" id="sidebarMenu">
+                        <li class="nav-item mb-2">
+                            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="nav-link">
+                                <i class="fas fa-home nav-icon"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-box"></i>
+                                <p>Inventory <i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="nav-link">
+                                        <p>All Products</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Product" asp-action="Create" class="nav-link">
+                                        <p>Create Product</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="nav-link">
+                                        <p>All Categories</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="MeasurementUnit" asp-action="Index" class="nav-link">
+                                        <p>Measurement Units</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Warehouse" asp-action="Index" class="nav-link">
+                                        <p>All Warehouses</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-exchange-alt"></i>
+                                <p>Stock Adjustment <i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="StockAdjustment" asp-action="Index" class="nav-link">
+                                        <p>All Adjustments</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="StockAdjustment" asp-action="Create" class="nav-link">
+                                        <p>Create Adjustment</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="StockTransfer" asp-action="Index" class="nav-link">
+                                        <p>All Stock Transfers</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="StockTransfer" asp-action="Create" class="nav-link">
+                                        <p>Create Stock Transfer</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-chart-line"></i>
+                                <p>Sales <i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Sale" asp-action="Index" class="nav-link">
+                                        <p>All Sales</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Sale" asp-action="Create" class="nav-link">
+                                        <p>Create Sale</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Sale" asp-action="Pos" class="nav-link">
+                                        <p>POS</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Sale" asp-action="Shipments" class="nav-link">
+                                        <p>Shipments</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Sale" asp-action="SalesReturn" class="nav-link">
+                                        <p>Sales Return</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-cart-plus"></i>
+                                <p>Purchases <i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Purchase" asp-action="Index" class="nav-link">
+                                        <p>All Purchases</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Purchase" asp-action="Create" class="nav-link">
+                                        <p>Create Purchase</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Purchase" asp-action="PurchasesReturn" class="nav-link">
+                                        <p>Purchases Return</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>People <i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="User" asp-action="Index" class="nav-link">
+                                        <p>All Users</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="User" asp-action="Create" class="nav-link">
+                                        <p>Create User</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Customer" asp-action="Index" class="nav-link">
+                                        <p>All Customers</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Customer" asp-action="Create" class="nav-link">
+                                        <p>Create Customer</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-cogs"></i>
+                                <p>Settings <i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Settings" asp-action="Sms" class="nav-link">
+                                        <p>SMS</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Settings" asp-action="Email" class="nav-link">
+                                        <p>Email</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Settings" asp-action="GroupPermission" class="nav-link">
+                                        <p>Group Permission</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Settings" asp-action="Backup" class="nav-link">
+                                        <p>Backup</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-clipboard-list"></i>
+                                <p>Reports <i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Report" asp-action="Sales" class="nav-link">
+                                        <p>Sales</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Report" asp-action="Purchases" class="nav-link">
+                                        <p>Purchases</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Report" asp-action="ProfitLoss" class="nav-link">
+                                        <p>Profit and Loss</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Report" asp-action="Stock" class="nav-link">
+                                        <p>Stock Report</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Report" asp-action="TopSellingProducts" class="nav-link">
+                                        <p>Top Selling Products</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-area="Admin" asp-controller="Report" asp-action="BestCustomer" class="nav-link">
+                                        <p>Best Customer</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+
+
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            @RenderBody()
+        </div>
+        <!-- /.content-wrapper -->
+        <!-- Footer -->
+        <footer class="main-footer">
+            <strong>&copy; 2021 ERP System.</strong> All rights reserved.
+            <div class="float-right d-none d-sm-inline-block">
+                <b>Version</b> 3.2.0
+            </div>
+        </footer>
+    </div>
+    <!-- ./wrapper -->
+    <!-- Scripts -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const sidebarToggle = document.querySelector("[data-widget='pushmenu']");
+            const hasTreeviewItems = document.querySelectorAll(".nav-item.has-treeview");
+
+            let previousState = []; // To store previously expanded state of the sidebar items
+
+            sidebarToggle.addEventListener("click", function () {
+                const anyExpanded = Array.from(hasTreeviewItems).some(item =>
+                    item.classList.contains("menu-open")
+                );
+
+                if (anyExpanded) {
+                    // Save the current expanded state
+                    previousState = Array.from(hasTreeviewItems).map(item =>
+                        item.classList.contains("menu-open")
+                    );
+
+                    // Collapse all treeview items
+                    hasTreeviewItems.forEach(item => {
+                        item.classList.remove("menu-open");
+                        const link = item.querySelector(".nav-link");
+                        if (link) {
+                            link.classList.remove("active");
+                        }
+                    });
+                } else {
+                    // Restore the previous state
+                    hasTreeviewItems.forEach((item, index) => {
+                        if (previousState[index]) {
+                            item.classList.add("menu-open");
+                            const link = item.querySelector(".nav-link");
+                            if (link) {
+                                link.classList.add("active");
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const navLinks = document.querySelectorAll("#sidebarMenu .nav-link");
+            const sidebarToggle = document.querySelector("[data-widget='pushmenu']");
+            const body = document.body; // Reference to the body element
+
+            // Get the current full path, including the query string
+            const currentPath = window.location.pathname;
+
+            // Function to set the active class for links
+            function setActiveLinks() {
+                navLinks.forEach(function (link) {
+                    const linkUrl = link.getAttribute("href");
+
+                    // Check if the link's URL matches the current path
+                    if (linkUrl === currentPath || linkUrl === currentPath + '/') {
+                        link.classList.add("active");
+
+                        // Expand the parent menu if it's part of a tree view
+                        let parent = link.closest(".has-treeview");
+                        if (parent) {
+                            parent.classList.add("menu-open"); // Open the parent menu
+                            parent.querySelector(".nav-link").classList.add("active"); // Mark parent as active
+                        }
+                    } else {
+                        link.classList.remove("active");
+                    }
+                });
+            }
+
+            // Set active links on page load
+            setActiveLinks();
+
+            // Handle click event to mark the clicked link as active
+            navLinks.forEach(function (link) {
+                link.addEventListener("click", function () {
+                    // Remove the 'active' class from all links
+                    navLinks.forEach(function (nav) {
+                        nav.classList.remove("active");
+                    });
+
+                    // Add 'active' class to the clicked link
+                    this.classList.add("active");
+                });
+            });
+        });
+
+
+
+    </script>
+    <script src="~/adminlte/plugins/jquery/jquery.min.js"></script>
+    <script src="~/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/adminlte/js/adminlte.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tagify/4.8.0/jQuery.tagify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tagify/4.8.0/tagify.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", false)
+</body>
+</html>

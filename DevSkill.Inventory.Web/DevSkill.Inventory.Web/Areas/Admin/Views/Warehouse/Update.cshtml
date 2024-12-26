@@ -1,0 +1,195 @@
+﻿@model WarehouseUpdateModel
+@{
+    ViewData["Title"] = "Update Warehouse";
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/adminlte/css/customStyle.css">
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Update Warehouse</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item">
+                        <a href="@Url.Action("Index", "Warehouse", new { area = "Admin" })">Warehouses</a>
+                    </li>
+                    <li class="breadcrumb-item active">Update</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col">
+                <!-- general form elements -->
+                <div class="card">
+                    <!-- form start -->
+                    <form asp-antiforgery="true" asp-area="Admin" asp-controller="Warehouse" asp-action="Update" method="post">
+                        <partial name="_ResponsePartial" />
+                        <input type="hidden" asp-for="Id" />
+                        <div asp-validation-summary="All" class="text-danger"></div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Name"></label>
+                                    <input asp-for="Name" class="form-control" required />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="createDate">Create Date</label>
+                                    <input type="text" class="form-control" id="createDate" value="@Model.CreateDate" disabled />
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="PhoneNumber"></label>
+                                    <input asp-for="PhoneNumber" class="form-control" required />
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Email"></label>
+                                    <input asp-for="Email" class="form-control" required />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label asp-for="Address"></label>
+                                    <input asp-for="Address" class="form-control" required />
+                                    <span asp-validation-for="Address" class="text-danger"></span>
+                                </div>
+
+                               @*  <div class="col-md-6 mb-3">
+                                    <label for="selectedProducts">Selected Products</label>
+                                    <ul id="selectedProductsList" class="list-group" style="max-height: 200px; overflow-y: auto;">
+                                        @foreach (var product in Model.Products.Where(p => (bool)p.IsSelected))
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>@product.Title</span>
+                                                <button type="button" class="btn btn-danger btn-sm remove-product" data-id="@product.Id">Remove</button>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div> *@
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="availableProducts">Available Products</label>
+                                    <select asp-for="SelectedProductIds" class="form-control" multiple="multiple" id="productsSelect">
+                                        @foreach (var product in Model.Products)
+                                        {
+                                            <option value="@product.Id" selected="@(product.IsSelected ? "selected" : null)">
+                                                @product.Title
+                                            </option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="SelectedProductIds" class="text-danger"></span>
+                                </div>
+
+
+                            </div>
+
+                            <div class="form-group mt-3">
+                                <button type="submit" class="btn btn-primary">Update Warehouse</button>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                    </form>
+                </div>
+                <!-- /.card -->
+            </div>
+            <!--/.col (left) -->
+        </div>
+        <!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+   @*  <script>
+        $(document).ready(function () {
+            // Handle removal of selected products
+            $(document).on('click', '.remove-product', function () {
+                var $listItem = $(this).closest('li'); // Cache the list item
+                var productId = $(this).data('id');
+                var productTitle = $listItem.find('span').text();
+
+                // Add the product back to the available products list
+                var newOption = new Option(productTitle, productId, false, false);
+                $('#availableProducts').append(newOption); // Add to available products list
+
+                // Remove the product from the selected products list
+                $listItem.remove();
+            });
+
+            // Handle adding products to the selected list
+            $('#availableProducts').on('change', function () {
+                var selectedOptions = $(this).find('option:selected'); // Cache the selected options
+
+                selectedOptions.each(function () {
+                    var productId = $(this).val();
+                    var productTitle = $(this).text();
+
+                    // Add the product to the selected products list
+                    var newListItem = `
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span>${productTitle}</span>
+                                            <button type="button" class="btn btn-danger btn-sm remove-product" data-id="${productId}">Remove</button>
+                                        </li>`;
+                    $('#selectedProductsList').append(newListItem);
+
+                    // Remove the product from the available products list
+                    $(this).remove(); // Remove the option after adding to the selected list
+                });
+            });
+
+            // On form submit, clear #availableProducts and add selected products back
+            $('form').on('submit', function () {
+                // Clear existing options in available products
+                $('#availableProducts').empty();
+
+                // Add selected products back to available products
+                $('#selectedProductsList li').each(function () {
+                    var productId = $(this).find('button').data('id');
+                    var productTitle = $(this).find('span').text();
+
+                    // Create a new option for each selected product
+                    // Mark the option as selected
+                    var newOption = `<option value="${productId}" selected="selected">${productTitle}</option>`;
+                    $('#availableProducts').append(newOption);
+                });
+
+                // Create hidden inputs for selected products for form submission
+                var selectedProducts = [];
+                $('#selectedProductsList li').each(function () {
+                    selectedProducts.push($(this).find('button').data('id')); // Assuming the button has the product ID
+                });
+
+                // Clear existing hidden inputs for Products
+                $('input[name="Products"]').remove();
+
+                // Create hidden inputs for each selected product
+                $.each(selectedProducts, function (index, value) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'Products', // Change this to "Products"
+                        value: value
+                    }).appendTo('form');
+                });
+            });
+        }); *@
+    </script>
+}
+

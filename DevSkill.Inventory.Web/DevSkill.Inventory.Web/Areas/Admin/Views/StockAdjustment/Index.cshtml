@@ -1,0 +1,535 @@
+﻿@model StockAdjustmentListModel
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery antiforgery
+@{
+    ViewData["Title"] = "Stock Adjustments";
+}
+@{
+    var iconPath = Url.Content("~/adminlte/svg/icons.svg");
+}
+@section Styles
+{
+    <link rel="stylesheet" href="~/adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/adminlte/css/customStyle.css">
+}
+
+@section Scripts
+{
+    <script src="~/adminlte/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/adminlte/plugins/jszip/jszip.min.js"></script>
+    <script src="~/adminlte/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="~/adminlte/plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="~/adminlte/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="~/adminlte/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+
+    <script>
+        $(function () {
+            // Initialize DataTable
+            var table = $("#stockAdjustment").DataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                lengthChange: false,
+                searching: false,
+                autoWidth: false,
+                lengthMenu: [
+                    [10, 25, 50, -1],
+                    [10, 25, 50, 'All']
+                ],
+                ajax: {
+                    url: "/Admin/StockAdjustment/GetStockAdjustmentsJsonData",
+                    type: "POST",
+                    contentType: "application/json",
+                    dataType: "json",
+                    data: function (d) {
+                        d.Search = {
+                            Value: $("#customSearchBox").val(),
+                        };
+                        console.log("Request data:", d); // Log request data for debugging
+                        return JSON.stringify(d);
+                    },
+                    error: function (xhr, error, thrown) {
+                        console.error("Error fetching data:", error); // Log any errors
+                        alert('Error fetching data: ' + xhr.responseText); // Alert user on error
+                    }
+                },
+                columns: [
+                    {
+                        data: null,
+                        className: 'checkbox-column',
+                        width: '5%',
+                        render: function (data, type, row) {
+                            return `<input type="checkbox" class="row-select" data-id="${row[5]}">`; // Access ID directly from the row array
+                        },
+                        searchable: false,
+                        orderable: false
+                    },
+                    {
+                        data: 0, // Corresponds to record.Product.Title
+                        name: "Product Name",
+                        className: 'dt-center',
+                        width: '20%',
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: 1, // Corresponds to record.QuantityAdjusted
+                        name: "Quantity Adjusted",
+                        className: 'dt-center',
+                        width: '10%',
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: 2, // Corresponds to record.Reason
+                        name: "Reason",
+                        className: 'dt-center',
+                        width: '15%',
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: 3, // Corresponds to record.AdjustmentDate
+                        name: "Adjustment Date",
+                        className: 'dt-center',
+                        width: '15%',
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: 4, // Corresponds to record.Warehouse.Name
+                        name: "Warehouse",
+                        className: 'dt-center',
+                        width: '20%',
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: null,
+                        className: 'dt-center',
+                        width: '20%',
+                        render: function (data, type, row) {
+                            const id = row[5]; // Access ID directly from the row array
+                            return `<div style="display: flex; justify-content: center;">
+                                    <a href="/admin/stockadjustment/update/${id}"  title="Edit stockadjustment">
+                                        <svg style="width: 47px; height: 47px; padding:0px;">
+                                            <use xlink:href="@iconPath#icon-edit"></use>
+                                        </svg>
+                                    </a>
+                                                    <a href="#" class="show-bs-modal" data-id='${id}' title="Delete stockadjustment">
+                                        <svg style="width: 45px; height: 45px;">
+                                            <use xlink:href="@iconPath#icon-delete"></use>
+                                        </svg>
+                                    </a>
+                                    </div>
+                                
+                                `;
+                        },
+                        searchable: false,
+                        orderable: false
+                    }
+                ],
+                order: [[1, 'asc']],
+                dom: '<"row"<"col-sm-12 col-md-6"lB>>' +
+                    '<"row"<"col-sm-12"tr>>' +
+                    '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                buttons: [
+                    { extend: 'csv', text: 'CSV', className: 'dropdown-item' },
+                    { extend: 'excel', text: 'Excel', className: 'dropdown-item' },
+                    { extend: 'pdf', text: 'PDF', className: 'dropdown-item' },
+
+                ],
+                language: {
+                    paginate: {
+                        previous: '<',  // Left arrow for "Previous"
+                        next: '>'       // Right arrow for "Next"
+                    }
+                }
+            });
+
+            $('#customSearchBox').on('input', function () {
+                table.ajax.reload();
+            });
+
+            // Append DataTable buttons to dropdown
+            table.buttons().container().appendTo('#dataTableExport .dropdown-menu');
+            // Move DataTable buttons to dropdown
+            table.buttons().container().appendTo('#dataTableExport');
+
+            $('#stockAdjustment').on('click', '.show-bs-modal', function (event) {
+                let id = $(this).data("id");
+                let modal = $("#modal-default");
+                modal.find('.modal-body p').text('Are you sure you want to delete this record?');
+                $("#deleteId").val(id);
+                $("#deleteForm").attr("action", "/admin/stockadjustment/delete");
+                modal.modal('show');
+            });
+
+            window.openUpdateModal = function (id, productName, quantityAdjusted, reason) {
+                $("#updateId").val(id);
+                $("#updateProductName").val(productName);
+                $("#updateQuantityAdjusted").val(quantityAdjusted);
+                $("#updateReason").val(reason);
+                $("#updateStockAdjustmentModal").modal('show');
+            };
+
+            $('#updateStockAdjustmentForm').on('submit', function (e) {
+                e.preventDefault();
+                var formData = {
+                    Id: $("#updateId").val(),
+                    ProductId: $("#updateProductId").val(),
+                    QuantityAdjusted: $("#updateQuantityAdjusted").val(),
+                    Reason: $("#updateReason").val()
+                };
+
+                var token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: '@Url.Action("UpdateJsonAsync", "StockAdjustment", new { area = "admin", id = "__id__" })'.replace("__id__", $("#updateId").val()),
+                    type: 'POST',
+                    contentType: 'application/json',
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        $('#stockAdjustment').DataTable().ajax.reload();
+                        $('#updateStockAdjustmentModal').modal('hide');
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error updating stock adjustment:', error);
+                        alert('Error updating stock adjustment: ' + xhr.responseText);
+                    }
+                });
+            });
+
+            $("#deleteButton").click(function () {
+                $("#deleteForm").submit();
+            });
+            $(document).ready(function () {
+                var selectedIds = []; // Array to store selected product IDs
+
+                // Handle "Select All" checkbox
+                $('#selectAll').on('change', function () {
+                    var isChecked = this.checked;
+                    $('.row-select').each(function () {
+                        $(this).prop('checked', isChecked);
+                        toggleSelection($(this).data('id'), isChecked); // Update selectedIds array
+                    });
+                    toggleBulkDeleteButton();
+                });
+
+                // Event delegation for dynamically added checkboxes
+                $(document).on('change', '.row-select', function () {
+                    var id = $(this).data('id');
+                    toggleSelection(id, $(this).prop('checked')); // Update selectedIds array
+
+                    // If any checkbox is unchecked, uncheck "Select All"
+                    if (!$(this).prop('checked')) {
+                        $('#selectAll').prop('checked', false);
+                    }
+
+                    // If all checkboxes on the current page are checked, check "Select All"
+                    if ($('.row-select:checked').length === $('.row-select').length) {
+                        $('#selectAll').prop('checked', true);
+                    }
+
+                    // Show or hide the bulk delete button
+                    toggleBulkDeleteButton();
+                });
+
+                // Show or hide the bulk delete button based on selections
+                function toggleBulkDeleteButton() {
+                    $('#bulkDeleteContainer').toggle(selectedIds.length > 0);
+                }
+
+                // Function to add or remove ID from selectedIds array
+                function toggleSelection(id, isSelected) {
+                    if (isSelected) {
+                        if (!selectedIds.includes(id)) selectedIds.push(id);
+                    } else {
+                        selectedIds = selectedIds.filter(selectedId => selectedId !== id);
+                    }
+                }
+
+                // Bulk delete modal trigger and collect IDs
+                $('#bulkDelete').on('click', function () {
+                    if (selectedIds.length > 0) {
+                        $('#deleteIds').val(selectedIds.join(',')); // Set the hidden input in the modal with selected IDs
+                        $('#BulkDelete').modal('show'); // Show the delete confirmation modal
+                    } else {
+                        alert('No stockadjustment selected for deletion.');
+                    }
+                });
+
+                // Handle the delete button inside the modal
+                $('#bulkDeleteButton').on('click', function () {
+                    var deleteIds = $('#deleteIds').val();
+                    if (deleteIds) {
+                        $('#bulkDeleteForm').submit(); // Submit the form with selected IDs for deletion
+                    } else {
+                        alert('No stockadjustment selected for deletion.');
+                    }
+                });
+
+                // Preserve checkbox selections on page change
+                $('#yourTableId').on('draw.dt', function () {
+                    $('.row-select').each(function () {
+                        var id = $(this).data('id');
+                        $(this).prop('checked', selectedIds.includes(id));
+                    });
+
+                    // Set "Select All" checkbox based on current page selections
+                    $('#selectAll').prop('checked', $('.row-select:checked').length === $('.row-select').length);
+                });
+            });
+            $('#createStockAdjustmentForm').on('submit', function (e) {
+                e.preventDefault();
+
+                var formData = {
+                    ProductId: $("#createProductId").val(),
+                    QuantityAdjusted: $("#createQuantityAdjusted").val(),
+                    Reason: $("#createReason").val()
+                };
+
+                var token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: '/Admin/StockAdjustment/Create',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        $('#stockAdjustment').DataTable().ajax.reload();
+                        $('#createStockAdjustmentModal').modal('hide');
+                        $('#createStockAdjustmentForm')[0].reset();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error creating stock adjustment:', error);
+                        alert('Error creating stock adjustment: ' + xhr.responseText);
+                    }
+                });
+            });
+
+            // Create modal functionality implementation
+            $(document).ready(function () {
+                // Search for products as the user types
+                $('#createProductSearch').on('input', function () {
+                    const query = $(this).val();
+                    if (query.length > 0) {
+                        $.ajax({
+                            url: '/Admin/StockAdjustment/SearchProducts', // Create this endpoint
+                            type: 'GET',
+                            data: { searchTerm: query },
+                            success: function (data) {
+                                $('#productDropdown').empty(); // Clear previous results
+                                if (data.length > 0) {
+                                    data.forEach(function (product) {
+                                        $('#productDropdown').append(`
+                                                <li class="dropdown-item" data-id="${product.id}" data-stock="${product.stock}">${product.title}</li>
+                                            `);
+                                    });
+                                    $('#productDropdown').show(); // Show dropdown
+                                } else {
+                                    $('#productDropdown').hide(); // Hide dropdown if no results
+                                }
+                            },
+                            error: function () {
+                                console.error("Error fetching products.");
+                            }
+                        });
+                    } else {
+                        $('#productDropdown').hide(); // Hide dropdown if input is empty
+                    }
+                });
+
+                // Handle product selection from the dropdown
+                $(document).on('click', '#productDropdown .dropdown-item', function () {
+                    const productId = $(this).data('id');
+                    const productName = $(this).text();
+                    const stock = $(this).data('stock'); // Get stock from data attribute
+
+                    $('#createProductSearch').val(productName); // Set the product name in the search box
+                    $('#productDropdown').hide(); // Hide the dropdown
+                    $('#currentStock').text(stock); // Set current stock in the modal
+                    $('#createProductId').val(productId); // Set the selected product ID in a hidden field
+                });
+
+                // Hide dropdown when clicking outside
+                $(document).on('click', function (e) {
+                    if (!$(e.target).closest('#createProductSearch').length) {
+                        $('#productDropdown').hide();
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Stock Adjustments</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">Stock Adjustments</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="btn-group">
+                            <input type="text" id="customSearchBox" class="form-control form-control-sm" placeholder="Search...">
+                        </div>
+                 
+                        <div class="card-tools">
+                            <div class="btn-group" style="display: none;" id="bulkDeleteContainer">
+                                <button id="bulkDelete" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#BulkDelete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sucess btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    Export <i class="fas fa-cog"></i>
+                                </button>
+                                <div id="dataTableExport" class="dropdown-menu" role="menu">
+                                    <!-- DataTable buttons will be appended here dynamically -->
+                                </div>
+                            </div>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    Show <span class="items-count">10</span>
+                                </button>
+                                <div class="dropdown-menu" role="menu">
+                                    <a class="dropdown-item" href="#" onclick="$('#stockAdjustment').DataTable().page.len(10).draw(); $('.items-count').text('10');">10</a>
+                                    <a class="dropdown-item" href="#" onclick="$('#stockAdjustment').DataTable().page.len(25).draw(); $('.items-count').text('25');">25</a>
+                                    <a class="dropdown-item" href="#" onclick="$('#stockAdjustment').DataTable().page.len(50).draw(); $('.items-count').text('50');">50</a>
+                                    <a class="dropdown-item" href="#" onclick="$('#stockAdjustment').DataTable().page.len(-1).draw(); $('.items-count').text('All');">All</a>
+                                </div>
+                            </div>
+                            <div class="btn-group">
+                                <a href="@Url.Action("Create", "StockAdjustment")" class="btn btn-primary-cs btn-sm">
+                                    <i class="fas fa-plus"></i> New
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <partial name="_ResponsePartial" />
+                        <partial name="_ModalPartial" />
+                        <table id="stockAdjustment" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAll" /></th>
+                                    <th>Product Name</th>
+                                    <th>Quantity</th>
+                                    <th>Reason</th>
+                                    <th>Date</th>
+                                    <th>Warehouse</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                        </table>
+
+
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+<!-- Bulk Delete Warehouse Modal -->
+<div class="modal fade" id="BulkDelete">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Delete</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the selected Stock Adjustments?</p>
+                <form id="bulkDeleteForm" action="/Admin/StockAdjustment/BulkDelete" method="post" asp-antiforgery="true" area="Admin">
+                    <!-- Hidden input to store the list of selected IDs -->
+                    <input type="hidden" id="deleteIds" name="ids" />
+                </form>
+
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" id="bulkDeleteButton" class="btn btn-danger">Yes, Delete!</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Stock Adjustment Modal -->
+<div class="modal fade" id="stockAdjustmentModal" tabindex="-1" role="dialog" aria-labelledby="stockAdjustmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stockAdjustmentModalLabel">Update Stock Adjustment</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="stockAdjustmentForm">
+                    <div class="form-group">
+                        <label for="productTitle">Product Title</label>
+                        <input type="text" class="form-control" id="productTitle" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantityAdjusted">Quantity Adjusted</label>
+                        <input type="number" class="form-control" id="quantityAdjusted" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reason">Reason</label>
+                        <input type="text" class="form-control" id="reason" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adjustmentDate">Adjustment Date</label>
+                        <input type="date" class="form-control" id="adjustmentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="warehouse">Warehouse</label>
+                        <input type="text" class="form-control" id="warehouse" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitStockAdjustment()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>

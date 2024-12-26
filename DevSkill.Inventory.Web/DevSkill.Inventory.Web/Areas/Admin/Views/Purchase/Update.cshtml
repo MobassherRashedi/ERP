@@ -1,0 +1,150 @@
+﻿@model PurchaseUpdateModel
+@{
+    ViewData["Title"] = "Update Purchase";
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/adminlte/css/customStyle.css">
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Update Purchase</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Purchases</a></li>
+                    <li class="breadcrumb-item active">Update Purchase</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col">
+                <!-- general form elements -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Update Purchase</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <form asp-antiforgery="true" asp-area="Admin" asp-controller="Purchase" asp-action="Update" method="post">
+                        <div class="card-body">
+                            <input type="hidden" asp-for="Id" />
+
+                            <!-- Supplier Name -->
+                            <div class="form-group">
+                                <label asp-for="SupplierName"></label>
+                                <input type="text" asp-for="SupplierName" class="form-control" />
+                                <span asp-validation-for="SupplierName" class="text-danger"></span>
+                            </div>
+
+                            <!-- Purchase Date -->
+                            <div class="form-group">
+                                <label asp-for="Date"></label>
+                                <input type="date" asp-for="Date" class="form-control" />
+                                <span asp-validation-for="Date" class="text-danger"></span>
+                            </div>
+
+                            <!-- Total Amount -->
+                            <div class="form-group">
+                                <label asp-for="TotalAmount"></label>
+                                <input type="number" asp-for="TotalAmount" class="form-control" step="0.01" />
+                                <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                            </div>
+
+                            <!-- Purchased Items Table -->
+                            <div class="form-group">
+                                <label>Purchased Items</label>
+                                <table class="table table-bordered" id="itemsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Price</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (var i = 0; i < Model.Items.Count; i++)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <input type="text" name="Items[@i].ProductName" class="form-control" value="@Model.Items[i].ProductId" />
+                                                </td>
+                                                <td>
+                                                    <input type="number" name="Items[@i].Quantity" class="form-control" step="1" min="1" value="@Model.Items[i].Quantity" />
+                                                </td>
+                                                <td>
+                                                    <input type="number" name="Items[@i].UnitPrice" class="form-control" step="0.01" value="@Model.Items[i].UnitPrice" />
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                                <button type="button" class="btn btn-primary btn-sm" id="addItem">Add Item</button>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Update Purchase</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.card -->
+            </div>
+            <!--/.col (left) -->
+        </div>
+        <!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(function () {
+            let itemIndex = @Model.Items.Count; // Starting index from existing items
+
+            // Add new item row
+            $("#addItem").click(function () {
+                let newItemRow = `<tr>
+                                            <td>
+                                                <input type="text" name="Items[${itemIndex}].ProductName" class="form-control" placeholder="Product Name" />
+                                            </td>
+                                            <td>
+                                                <input type="number" name="Items[${itemIndex}].Quantity" class="form-control" step="1" min="1" placeholder="Quantity" />
+                                            </td>
+                                            <td>
+                                                <input type="number" name="Items[${itemIndex}].UnitPrice" class="form-control" step="0.01" placeholder="Unit Price" />
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
+                                            </td>
+                                        </tr>`;
+                $("#itemsTable tbody").append(newItemRow);
+                itemIndex++;
+            });
+
+            // Remove item row
+            $(document).on('click', '.remove-item', function () {
+                $(this).closest('tr').remove();
+            });
+        });
+    </script>
+}

@@ -1,0 +1,19 @@
+﻿@using DevSkill.Inventory.Web.Areas.Admin.Models
+@using DevSkill.Inventory.Infrastructure
+
+@if (TempData.Peek<ResponseModel>("ResponseMessage") != null)
+{
+    var response = TempData.Get<ResponseModel>("ResponseMessage");
+    <div id="alert" class="alert alert-@(response.Type.ToString().ToLower())" role="alert">
+        @response.Message
+    </div>
+
+    <script>
+        setTimeout(function () {
+            var alertElement = document.getElementById('alert');
+            if (alertElement) {
+                alertElement.style.display = 'none';
+            }
+        }, 4000); // 4000 milliseconds = 4 seconds
+    </script>
+}

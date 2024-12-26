@@ -1,0 +1,103 @@
+﻿@model DevSkill.Inventory.Infrastructure.Identity.ApplicationUser
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body card-body-cs">
+                    <h2 class="text-center">@Model.FullName's Profile</h2>
+                    <hr />
+
+                    <div class="row g-3">
+                        <!-- Profile Picture -->
+                        <div class="col-md-12 text-center mb-4">
+                            <img src="@Model.ProfilePicture" alt="@Model.FullName's Profile Picture" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;" />
+                        </div>
+
+                        <!-- First Name -->
+                        <div class="col-md-6 form-floating">
+                            <input asp-for="FirstName" class="form-control" readonly />
+                            <label asp-for="FirstName">First Name</label>
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="col-md-6 form-floating">
+                            <input asp-for="LastName" class="form-control" readonly />
+                            <label asp-for="LastName">Last Name</label>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6 form-floating">
+                            <input asp-for="Email" class="form-control" readonly />
+                            <label asp-for="Email">Email</label>
+                        </div>
+
+                        <!-- Gender -->
+                        <div class="col-md-6 form-floating">
+                            <select asp-for="Gender" class="form-control" disabled>
+                                <option value="1">Male</option>
+                                <option value="2">Female</option>
+                                <option value="3">Other</option>
+                                <option value="4">Prefer Not to Say</option>
+                            </select>
+                            <label asp-for="Gender">Gender</label>
+                        </div>
+
+                        <!-- Date of Birth -->
+                        <div class="col-md-6 form-floating">
+                            <input asp-for="DateOfBirth" type="date" class="form-control" readonly />
+                            <label asp-for="DateOfBirth">Date of Birth</label>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="col-md-6 form-floating">
+                            <input asp-for="PhoneNumber" class="form-control" readonly />
+                            <label asp-for="PhoneNumber">Phone Number</label>
+                        </div>
+                    </div>
+
+                    <a href="@Url.Action("ProfileEdit", "Account")" class="btn btn-warning mt-3">Edit Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: #f8f9fa;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .card {
+        border-radius: 15px;
+    }
+
+    .card-body {
+        padding: 30px;
+    }
+
+    h2 {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-floating label {
+        padding-left: 12px;
+    }
+
+    .form-floating .form-control {
+        height: calc(3.5rem + 2px);
+    }
+
+    .form-control {
+        padding: 12px;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

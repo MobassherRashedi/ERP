@@ -1,0 +1,642 @@
+﻿@model ProductCreateModel
+@{
+    ViewData["Title"] = "Create";
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-sm-6">
+                <h1>Create Product</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item">
+                        <a href="@Url.Action("Index", "Product", new { area = "Admin" })">Product</a>
+                    </li>
+                    <li class="breadcrumb-item active">Create Product</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+             <form id="productForm" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                <!-- Basic Details Card -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <!-- Title Field -->
+                                    <div class="form-group mb-3">
+                                        <label asp-for="Title" class="col-form-label">Title:</label>
+                                        <input type="text" asp-for="Title" class="form-control" />
+                                        <span asp-validation-for="Title" class="text-danger"></span>
+                                    </div>
+
+                                    <!-- Entry Price Field -->
+                                    <div class="form-group mb-3">
+                                        <label asp-for="Price" class="col-form-label">Entry Price:</label>
+                                        <input type="number" asp-for="Price" class="form-control" step="0.01" />
+                                        <span asp-validation-for="Price" class="text-danger"></span>
+                                    </div>
+                                    <!--  Sale Price Field -->
+                                    <div class="form-group mb-3">
+                                        <label asp-for="SalePrice" class="col-form-label">Sale Price:</label>
+                                        <input type="number" asp-for="SalePrice" class="form-control" step="0.01" />
+                                        <span asp-validation-for="SalePrice" class="text-danger"></span>
+                                    </div>
+                                    <!-- SKU Field -->
+                                    <div class="form-group mb-3 ">
+                                        <label asp-for="SKU" class="col-form-label mr-2" style="min-width: 120px;">SKU:</label>
+                                        <input type="text" asp-for="SKU" class="form-control" />
+                                        <span asp-validation-for="SKU" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <!-- Image Upload Card -->
+                                    <div class="d-flex align-items-center justify-content-center image-cs-margin">
+                                        <div class="form-group d-flex align-items-center justify-content-center">
+                                                <div class="image-upload item-details-image border rounded p-4" id="dragDropArea">
+                                                    <div class="text-center" id="upload" style="display: flex; align-items: center; justify-content: center;">
+                                                        <input type="file" accept="image/*" name="ImageFile" id="fileInput" style="display: none;" />
+
+                                                        <!-- Initial Drag-and-Drop Content -->
+                                                        <div class="upload-content" style="display: block;">
+                                                            <div class="d-flex flex-column justify-content-center align-items-center" style="height: 150px;">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472.7 386.4" class="icon icon-35 text-muted mb-2" width="50" height="50">
+                                                                    <path d="M392 0H81C36 0 0 36 0 81v224a81 81 0 0081 81h311c44 0 81-36 81-81V81c0-45-37-81-81-81zM42 81c0-21 18-39 39-39h311c21 0 39 18 39 39v101l-112 76c-10 7-23 7-33-1l-94-66a72 72 0 00-82 1l-68 48V81zm389 224c0 22-18 39-39 39H81c-21 0-39-17-39-39v-14l92-65c10-7 24-7 34 0l94 66a71 71 0 0081 1l88-60v72z"></path>
+                                                                    <path d="M301 83a56 56 0 100 113 56 56 0 000-113zm0 78a21 21 0 110-43 21 21 0 010 43z"></path>
+                                                                </svg>
+                                                                <label class="faded-label text-muted drag-text">Drag image here or</label>
+                                                                <span class="text-primary cursor-pointer">Browse images</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Image Preview Area -->
+                                                        <div id="imagePreviewContainer" style="display: none; position: relative;">
+                                                            <img id="previewImage" class="img-thumbnail" style="max-height: 150px; margin-right: 10px;" />
+                                                            <button id="clearImages" class="btn btn-danger" type="button">Clear</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    </div>
+
+                                    <div class="form-group mb-3 mt-3">
+                                        <label class="col-form-label mr-2" style="min-width: 120px;">Barcode Symbology:</label>
+                                        <!-- Symbology Dropdown -->
+                                        <select class="form-control" id="barcodeSymbology" onchange="clearBarcodeInput()">
+                                            <option value="Code128">Code 128</option>
+                                            <option value="QR">QR Code</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Barcode Field -->
+                                    <div class="form-group mb-3 mt-3">
+                                        <label class="col-form-label mr-2" style="min-width: 120px;">Barcode:</label>
+                                        <div class="input-group">
+                                            <!-- Prepend Scan Icon -->
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <img src="~/images/resources/scan.png" alt="Scan" class="scan-icon" style="width: 20px; height: 20px;" />
+                                                </span>
+                                            </div>
+
+                                            <!-- Barcode Input Field (This will show the generated barcode value) -->
+                                            <input type="text" class="form-control" id="barcodeInput" readonly />
+
+                                            <!-- Append Barcode Button -->
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary" type="button" id="barcodeScanButton">
+                                                    <i class="fas fa-barcode"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <span id="barcodeValidationError" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <!-- Description Field -->
+                                    <div class="form-group mb-3">
+                                        <label asp-for="Description" class="col-form-label">Description:</label>
+                                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                                        <span asp-validation-for="Description" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                       
+                    </div>
+                </div>
+
+                <!-- Inventory Details Card -->
+                <div class="card card-custom-create mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <!-- Category Field -->
+                                <div class="form-group mb-3">
+                                    <label asp-for="CategoryId" class="col-form-label">Category:</label>
+                                    <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control" id="CategoryId">
+                                    </select>
+                                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                                </div>
+                                <!-- Dynamic Attributes Section -->
+                                <div class="mt-2" id="dynamic-attributes-container" style="display:none;">
+                                    <div id="dynamic-attributes"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                               
+                                <!-- Warehouse Field (with multiple selection) -->
+                                <div class="form-group mb-3">
+                                    <label asp-for="WarehouseIds" class="col-form-label">Warehouses:</label>
+                                    <select asp-for="WarehouseIds" asp-items="Model.Warehouses" class="form-control" multiple="multiple" id="warehouseSelect">
+                                    </select>
+                                    <span asp-validation-for="WarehouseIds" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3" id="warehouseInputsContainer">
+                                    <!-- Dynamic Inputs for Stock and Low Stock Threshold will appear here -->
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Details Card -->
+                <div class="card card-custom-create mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <!-- Measurement Unit Field -->
+                                <div class="form-group mb-3">
+                                    <label asp-for="MeasurementUnitId" class="col-form-label">Measurement Unit:</label>
+                                    <select asp-for="MeasurementUnitId" asp-items="Model.MeasurementUnits" class="form-control">
+                                    </select>
+                                    <span asp-validation-for="MeasurementUnitId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <!-- Brand  Field -->
+                                <div class="form-group mb-3">
+                                    <label asp-for="BrandId" class="col-form-label">Brand:</label>
+                                    <select asp-for="BrandId" asp-items="Model.Brands" class="form-control">
+                                    </select>
+                                    <span asp-validation-for="BrandId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tag Input Card -->
+                <div class="card card-custom-create mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="Tags" class="col-form-label">Product Tags:</label>
+                                    <input type="text" id="tagsInput" class="form-control" name="Tags" placeholder="Add tags" />
+                                    <span class="text-danger" id="tagsError"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Additional Details Card -->
+                <div class="card card-custom-create mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <!-- Active Checkbox -->
+                                <div class="form-group mb-3">
+                                    <input type="checkbox" asp-for="IsActive" class="form-check-input ml-1" />
+                                    <label asp-for="IsActive" class="col-form-label"> This Product Not For Selling</label>
+                                    <span asp-validation-for="IsActive" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+               
+
+                <!-- Submit Button -->
+                <div class="card-footer mt-4 mb-2">
+                    <div class="row">
+                        <div class="col-md-3 col-12">
+                                <button type="submit" class="btn btn-info btn-block">Save Product</button>
+                        </div>
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</section>
+<script src="~/adminlte/plugins/jquery/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script> <!-- QR Code library -->
+
+
+
+<script>
+    // Function to clear the barcode input and error when symbology changes
+    function clearBarcodeInput() {
+        const barcodeInput = document.getElementById("barcodeInput");
+        const barcodeValidationError = document.getElementById("barcodeValidationError");
+
+        if (barcodeInput) barcodeInput.value = ""; // Clear input field
+        if (barcodeValidationError) barcodeValidationError.textContent = ""; // Clear any error messages
+    }
+
+    // Wait for the DOM to be fully loaded before executing
+    document.addEventListener('DOMContentLoaded', function () {
+        // Event listener for barcode generation on button click
+        document.getElementById("barcodeScanButton").addEventListener("click", function () {
+            const symbology = document.getElementById("barcodeSymbology").value;
+            const barcodeValidationError = document.getElementById("barcodeValidationError");
+
+            // Clear any previous error
+            barcodeValidationError.textContent = '';
+
+            // Generate a barcode code based on the selected symbology
+            let barcodeCode = generateRandomBarcode(symbology);
+
+            // Format the barcode depending on the selected symbology
+            let format;
+            if (symbology === "Code128") {
+                format = "CODE128"; // Correct format identifier for Code128
+            } else if (symbology === "QR") {
+                format = "QR"; // QR code format (will use the QR Code library for rendering)
+            }
+
+            // Validate the barcode code
+            if (!isValidBarcode(barcodeCode, symbology)) {
+                barcodeValidationError.textContent = "Invalid barcode for selected symbology.";
+                return;
+            }
+
+            // Set the generated barcode code into the input field
+            if (document.getElementById("barcodeInput")) {
+                document.getElementById("barcodeInput").value = barcodeCode;
+            }
+
+            // For QR, use the QR Code library to generate the barcode and log it in the console (no SVG rendering)
+            if (symbology === "QR") {
+                // Generate the QR code in the background (optional)
+                QRCode.toString(barcodeCode, { type: 'svg' }, function (err, url) {
+                    if (err) {
+                        barcodeValidationError.textContent = "Error generating QR code.";
+                        return;
+                    }
+                    // Optional: Use QR code URL if needed elsewhere, like displaying in a different UI element
+                    console.log("Generated QR code:", url); // Can be removed if not needed
+                });
+            } else {
+                // For Code128, generate the barcode in the input field value (No visual SVG)
+                console.log("Generated Code 128 barcode:", barcodeCode); // Can be removed if not needed
+            }
+        });
+
+        // Function to generate a random barcode based on selected symbology
+        function generateRandomBarcode(symbology) {
+            const lengths = {
+                "Code128": 8, // Example length for Code128 (variable length can be used in real scenarios)
+                "QR": 8 // Example length for QR (it can vary greatly depending on data)
+            };
+            const length = lengths[symbology];
+            let barcode = Math.floor(Math.pow(10, length - 1) + Math.random() * 9 * Math.pow(10, length - 1)).toString();
+            return barcode;
+        }
+
+        // Function to validate barcode based on the selected symbology
+        function isValidBarcode(barcode, symbology) {
+            if (symbology === "Code128" && barcode.length < 1) return false; // Code128 can be variable length
+            if (symbology === "QR" && barcode.length < 1) return false; // QR Code can be any length
+            return true;
+        }
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        // Initialize Tagify outside of the form submit event
+        var input = document.querySelector('#tagsInput');
+        var tagify = new Tagify(input);
+
+        // Optional: Handle event when tags are added
+        tagify.on('add', function (e) {
+            console.log('Added tag:', e.detail.data);
+        });
+
+        // Optional: Handle event when tags are removed
+        tagify.on('remove', function (e) {
+            console.log('Removed tag:', e.detail.data);
+        });
+
+        // Form submission logic
+        $('#productForm').submit(function (event) {
+            event.preventDefault(); // Prevent form from submitting normally
+
+            // Initialize FormData object
+            var formData = new FormData();
+
+            // Add regular form data to FormData object
+            formData.append("Id", $("#Id").val());
+            formData.append("Title", $("#Title").val());
+            formData.append("Price", $("#Price").val());
+            formData.append("SalePrice", $("#SalePrice").val());
+            formData.append("SKU", $("#SKU").val());
+            formData.append("Barcode", $("#barcodeInput").val());
+            formData.append("Description", $("#Description").val());
+            formData.append("MeasurementUnitId", $("#MeasurementUnitId").val());
+            formData.append("BrandId", $("#BrandId").val());
+            formData.append("IsActive", $("#IsActive").prop("checked"));
+
+            // Add file to form data
+            var fileInput = $("#fileInput")[0].files;
+            if (fileInput.length > 0) {
+                formData.append("ImageFile", fileInput[0]); // Append the file
+                console.log("Selected File:", fileInput[0]); // Debugging line
+            } else {
+                console.log("No file selected."); // Debugging line
+            }
+
+            // Capture tags from the Tagify input field and append to FormData
+            var tags = tagify.value; // Get tags as an array of objects [{value: "dd"}, {value: "dsd"}, {value: "dsa"}]
+            if (tags && tags.length > 0) {
+                var tagNames = tags.map(tag => tag.value.trim()); // Extract tag names
+                formData.append("Tags", JSON.stringify(tagNames)); // Append to FormData as a JSON array
+                console.log("Tags:", tagNames); // Debugging line
+            }
+
+            // Prepare the Category object
+            var category = {
+                Id: $("#CategoryId").val(), // Category ID
+                Attributes: [] // Prepare attributes array
+            };
+
+            // Iterate through the dynamic attributes and build the Attributes array
+            $("#dynamic-attributes-container #dynamic-attributes input, #dynamic-attributes-container #dynamic-attributes select, #dynamic-attributes-container #dynamic-attributes textarea").each(function () {
+                var attributeName = $(this).attr("name");
+                var attributeValue = $(this).val();
+
+                // Push each attribute as an object inside the Attributes array
+                category.Attributes.push({ Name: attributeName, Value: attributeValue });
+            });
+
+            // Serialize the Category object and append to FormData
+            formData.append("Category", JSON.stringify(category));
+
+            // Prepare warehouse list
+            var warehouseList = [];
+            $("#warehouseInputsContainer .card").each(function () {
+                var warehouseId = $(this).attr("id").replace("warehouseCard_", "");
+                var stock = $(this).find(`#Stock_${warehouseId}`).val();
+                var lowStockThreshold = $(this).find(`#LowStockThreshold_${warehouseId}`).val();
+
+                // Check if the warehouse data is being properly captured
+                console.log(warehouseId, stock, lowStockThreshold);
+
+                // Push each warehouse data into the list
+                warehouseList.push({ warehouseId: warehouseId, stock: stock, LowStockThreshold: lowStockThreshold });
+            });
+
+            // Ensure warehouseList is correctly serialized and appended
+            formData.append("WarehouseList", JSON.stringify(warehouseList));
+            console.log("Warehouse List:", warehouseList);  // Debugging line
+
+            // Get CSRF token from the hidden field
+            var csrfToken = $('input[name="__RequestVerificationToken"]').val();
+
+            // Perform the AJAX call
+            $.ajax({
+                url: '/Admin/Product/Create',
+                type: 'POST',
+                data: formData,
+                processData: false, // Don't process data for file uploads
+                contentType: false, // Don't set content-type header for file uploads (FormData sets it automatically)
+                headers: {
+                    'RequestVerificationToken': csrfToken // Add CSRF token to headers
+                },
+                success: function (response) {
+                    window.location.href = '@Url.Action("Index", "Product", new { area = "Admin" })'; // Redirect to index page
+                },
+                error: function (xhr, status, error) {
+                    alert('An error occurred: ' + xhr.responseText); // Error handling
+                }
+            });
+        });
+    });
+
+</script>
+
+
+<script>
+    const dragDropArea = document.getElementById('dragDropArea');
+    const fileInput = document.getElementById('fileInput');
+    const uploadContent = document.querySelector('.upload-content');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const previewImage = document.getElementById('previewImage');
+    const clearImagesButton = document.getElementById('clearImages');
+
+    // Open file dialog on clicking the drag and drop area
+    dragDropArea.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // Handle file selection
+    fileInput.addEventListener('change', handleFiles);
+
+    // Handle drag and drop events
+    dragDropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragDropArea.classList.add('bg-light');
+    });
+
+    dragDropArea.addEventListener('dragleave', () => {
+        dragDropArea.classList.remove('bg-light');
+    });
+
+    dragDropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragDropArea.classList.remove('bg-light');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFiles();
+        }
+    });
+
+    // Function to handle file preview
+    function handleFiles() {
+        const files = fileInput.files;
+        if (files.length > 0) {
+            const file = files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // Display the preview image
+                previewImage.src = e.target.result;
+                imagePreviewContainer.style.display = 'flex';
+                uploadContent.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Clear images and reset file input
+    clearImagesButton.addEventListener('click', () => {
+        fileInput.value = '';
+        imagePreviewContainer.style.display = 'none';
+        uploadContent.style.display = 'block';
+        previewImage.src = '';  // Clear the preview image
+    });
+
+</script>
+<script>
+    // Global variable to track warehouse input data
+    let warehouseData = {};
+
+    // Function to remove warehouse
+    function removeWarehouse(warehouseId) {
+        // Remove the warehouse card from the DOM
+        var warehouseCard = document.getElementById(`warehouseCard_${warehouseId}`);
+        if (warehouseCard) {
+            warehouseCard.remove();
+        }
+
+        // Remove the warehouse from the warehouseData object
+        delete warehouseData[warehouseId];
+
+        // Remove the warehouse from the select dropdown (unselect it)
+        var warehouseSelect = document.getElementById('warehouseSelect');
+        var optionToRemove = Array.from(warehouseSelect.options).find(option => option.value == warehouseId);
+        if (optionToRemove) {
+            optionToRemove.selected = false;
+        }
+    }
+
+    // When the warehouse select field changes (multiple selection)
+    document.getElementById('warehouseSelect').addEventListener('change', function () {
+        var warehouseSelect = document.getElementById('warehouseSelect');
+        var selectedWarehouses = Array.from(warehouseSelect.selectedOptions).map(option => ({
+            id: option.value,
+            name: option.text // Assuming the text of the option is the warehouse name
+        }));
+
+        // Check if the default "Select a Warehouse" is selected
+        if (selectedWarehouses.some(warehouse => warehouse.id === "")) {
+            return; // Do nothing if "Select a Warehouse" is selected
+        }
+
+        generateWarehouseInputs(selectedWarehouses);
+    });
+
+    // Function to generate Stock and Low Stock Threshold inputs dynamically for each selected warehouse
+    function generateWarehouseInputs(selectedWarehouses) {
+        var container = document.getElementById('warehouseInputsContainer');
+
+        // Loop through selected warehouses and generate inputs
+        selectedWarehouses.forEach(function (warehouse) {
+            var warehouseId = warehouse.id;
+            var warehouseName = warehouse.name;
+
+            // If the card already exists, update its data and skip creating a new one
+            var existingCard = document.getElementById(`warehouseCard_${warehouseId}`);
+            if (existingCard) {
+                return; // Skip adding a new card for this warehouse
+            }
+
+            // Create a card for each warehouse
+            var warehouseCard = document.createElement('div');
+            warehouseCard.classList.add('card', 'mb-4');
+            warehouseCard.id = `warehouseCard_${warehouseId}`; // Ensure each card has a unique id
+
+            warehouseCard.innerHTML = `
+                <div class="card-body">
+                    <h6>Warehouse: ${warehouseName}
+                        <!-- Remove Icon -->
+                        <i class="fas fa-trash-alt text-danger float-right cursor-pointer" onclick="removeWarehouse('${warehouseId}')"></i>
+                    </h6> <!-- Display warehouse name -->
+
+                    <div class="row">
+                        <!-- Stock Input Field -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="Stock_${warehouseId}" class="col-form-label">Stock:</label>
+                                <input type="number" name="Stock[${warehouseId}]" id="Stock_${warehouseId}" class="form-control form-control-sm" value="${warehouseData[warehouseId]?.stock || ''}" />
+                            </div>
+                        </div>
+
+                        <!-- Low Stock Threshold Input Field -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="LowStockThreshold_${warehouseId}" class="col-form-label">Low Stock Threshold:</label>
+                                <input type="number" name="LowStockThreshold[${warehouseId}]" id="LowStockThreshold_${warehouseId}" class="form-control form-control-sm" value="${warehouseData[warehouseId]?.lowStockThreshold || ''}" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(warehouseCard);
+        });
+    }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Listen for category selection change
+        document.getElementById("CategoryId").addEventListener("change", function () {
+            var categoryId = this.value;
+
+            // Clear existing dynamic attributes
+            document.getElementById("dynamic-attributes").innerHTML = "";
+
+            // Hide the dynamic attributes container by default
+            document.getElementById("dynamic-attributes-container").style.display = "none";
+
+            if (categoryId) {
+                // Perform an AJAX request
+                fetch(`@Url.Action("GetCategoryAttributes", "Category")?categoryId=${categoryId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        if (data && data.length > 0) {
+                            // Populate the dynamic attributes section
+                            data.forEach(attribute => {
+                                var attributeHtml = `
+                                        <div class="form-group">
+                                            <label class="col-form-label">${attribute.name}:</label>
+                                            <input type="text" class="form-control" name="${attribute.name}" value="${attribute.value || ''}" />
+                                        </div>
+                                    `;
+                                document.getElementById("dynamic-attributes").insertAdjacentHTML('beforeend', attributeHtml);
+                            });
+
+                            // Show the dynamic attributes container
+                            document.getElementById("dynamic-attributes-container").style.display = "block";
+                        }
+                    })
+                    .catch(() => {
+                        alert("Error fetching dynamic attributes.");
+                    });
+            }
+        });
+    });
+</script>

@@ -1,0 +1,119 @@
+﻿@model WarehouseViewModel
+
+<form id="warehouseUpdateForm" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="row">
+        <!-- Hidden input for the warehouse Id -->
+        <input type="hidden" id="warehouseId" name="Id" value="@Model.Id" />
+
+        <div class="col-md-6 mb-3">
+            <label for="warehouseName">Warehouse Name</label>
+            <input type="text" class="form-control" id="warehouseName" name="Name" value="@Model.Name" required />
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="createDate">Create Date</label>
+            <input type="text" class="form-control" id="createDate" value="@Model.CreateDate?.ToString("yyyy-MM-dd")" disabled />
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="warehousePhoneNumber">Phone Number</label>
+            <input type="text" class="form-control" id="warehousePhoneNumber" name="PhoneNumber" value="@Model.PhoneNumber" />
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="warehouseEmail">Email</label>
+            <input type="email" class="form-control" id="warehouseEmail" name="Email" value="@Model.Email" />
+        </div>
+
+
+
+        <div class="col-md-12 mb-3">
+            <label for="warehouseAddress">Address</label>
+            <input type="text" class="form-control" id="warehouseAddress" name="Address" value="@Model.Address" />
+        </div>
+
+       @*  <div class="col-md-6 mb-3">
+            <label for="selectedProducts">Selected Products</label>
+            <ul id="selectedProductsList" class="list-group" style="max-height: 200px; overflow-y: auto;">
+                @foreach (var product in Model.Products.Where(p => (bool)p.IsSelected))
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>@product.Title</span>
+                        <button type="button" class="btn btn-danger btn-sm remove-product" data-id="@product.Id">Remove</button>
+                    </li>
+                }
+            </ul>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="availableProducts">Available Products</label>
+            <select id="availableProducts" name="Products" multiple="multiple" class="form-control" style="max-height: 200px; overflow-y: auto;">
+                @foreach (var product in Model.Products.Where(p => p.IsSelected == false && p.WarehouseId == null))
+                {
+                    <option value="@product.Id">@product.Title</option>
+                }
+            </select>
+        </div> *@
+
+
+    </div>
+
+    <!-- Validation summary for error messages -->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <strong>There were validation errors:</strong>
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="form-group mt-3">
+        <button type="submit" class="btn btn-primary">Update Warehouse</button>
+    </div>
+</form>
+
+@* <script>
+    $(document).ready(function () {
+        // Handle removal of selected products
+        $(document).on('click', '.remove-product', function () {
+            var $listItem = $(this).closest('li'); // Cache the list item
+            var productId = $(this).data('id');
+            var productTitle = $listItem.find('span').text();
+
+            // Add the product back to the available products list
+            var newOption = new Option(productTitle, productId, false, false);
+            $('#availableProducts').append(newOption); // Add to available products list
+
+            // Remove the product from the selected products list
+            $listItem.remove();
+        });
+
+        // Handle adding products to the selected list
+        $('#availableProducts').on('change', function () {
+            var selectedOptions = $(this).find('option:selected'); // Cache the selected options
+
+            selectedOptions.each(function () {
+                var productId = $(this).val();
+                var productTitle = $(this).text();
+
+                // Add the product to the selected products list
+                var newListItem = `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>${productTitle}</span>
+                        <button type="button" class="btn btn-danger btn-sm remove-product" data-id="${productId}">Remove</button>
+                    </li>`;
+                $('#selectedProductsList').append(newListItem);
+
+                // Remove the product from the available products list
+                $(this).remove(); // Remove the option after adding to the selected list
+            });
+        });
+    });
+
+</script> *@

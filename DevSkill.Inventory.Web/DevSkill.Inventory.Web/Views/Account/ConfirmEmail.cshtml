@@ -1,0 +1,13 @@
+﻿@model DevSkill.Inventory.Web.Models.ConfirmEmailModel
+
+<h2>Email Confirmation</h2>
+<p>
+    @if (Model != null && Model.IsConfirmed)
+    {
+        <span>Your email has been successfully confirmed. You can now <a href="/Account/Login">log in</a>.</span>
+    }
+    else
+    {
+        <span>There was an issue confirming your email. Please contact support.</span>
+    }
+</p>

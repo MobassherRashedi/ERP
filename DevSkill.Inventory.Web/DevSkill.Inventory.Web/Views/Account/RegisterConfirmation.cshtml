@@ -1,0 +1,12 @@
+﻿@model string
+@{
+    ViewData["Title"] = "Registration Confirmation";
+}
+
+<h2>Registration Confirmation</h2>
+<p>
+    Thank you for registering! A confirmation email has been sent to <strong>@ViewData["Email"]</strong>. Please check your inbox and confirm your email address to complete your registration.
+</p>
+<p>
+    Once confirmed, you can <a asp-action="Login" asp-controller="Account" asp-route-returnUrl="@ViewData["ReturnUrl"]">log in</a>.
+</p>

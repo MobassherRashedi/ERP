@@ -1,0 +1,238 @@
+﻿@* @model ProductUpdateModel
+@{
+    ViewData["Title"] = "Update Product";
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Update Product</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Product", new { area = "Admin" })">Product</a></li>
+                    <li class="breadcrumb-item active">Update</li>
+                </ol>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col">
+                <form id="productForm"  asp-antiforgery="true" asp-area="Admin" asp-controller="Product" asp-action="Update" method="post" enctype="multipart/form-data">
+                    <partial name="_ResponsePartial" />
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    @Html.HiddenFor(m => m.ExistingImagePath)
+                <!-- general form elements -->
+                <div class="card-body">
+                    <div class="row">
+                        <!-- First Column -->
+                            <div class="col-md-6">
+                                <!-- Title Field -->
+                                <div class="form-group mb-3 d-flex align-items-center">
+                                    <label asp-for="Title" class="col-form-label mr-2" style="min-width: 120px;">Title:</label>
+                                    <input type="text" asp-for="Title" class="form-control" />
+                                    <span asp-validation-for="Title" class="text-danger"></span>
+                                </div>
+                                <!-- Description Field -->
+                                <div class="form-group mb-3 d-flex align-items-center">
+                                    <label asp-for="Description" class="col-form-label mr-2" style="min-width: 120px;">Description:</label>
+                                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                                <!-- Price Field -->
+                                <div class="form-group mb-3 d-flex align-items-center">
+                                    <label asp-for="Price" class="col-form-label mr-2" style="min-width: 120px;">Price:</label>
+                                    <input type="number" asp-for="Price" class="form-control" step="0.01" />
+                                    <span asp-validation-for="Price" class="text-danger"></span>
+                                </div>
+                                <!-- Category Field -->
+                                <div class="form-group mb-3 d-flex align-items-center">
+                                    <label asp-for="CategoryId" class="col-form-label mr-2" style="min-width: 120px;">Category:</label>
+                                    <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control custom-dropdown">
+                                    </select>
+                                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                                </div>
+                                <!-- Stock Field -->
+                                <div class="form-group mb-3 d-flex align-items-center">
+                                    <label asp-for="Stock" class="col-form-label mr-2" style="min-width: 120px;">Stock:</label>
+                                    <input type="number" asp-for="Stock" class="form-control" />
+                                    <span asp-validation-for="Stock" class="text-danger"></span>
+                                </div>
+                                <!-- Low Stock Threshold Field -->
+                                <div class="form-group mb-3 d-flex align-items-center">
+                                    <label asp-for="LowStockThreshold" class="col-form-label mr-2" style="min-width: 120px;">Low Stock Threshold:</label>
+                                    <input type="number" asp-for="LowStockThreshold" class="form-control" />
+                                    <span asp-validation-for="LowStockThreshold" class="text-danger"></span>
+                                </div>
+                                <!-- Measurement Unit Field -->
+                                <div class="form-group mb-3 d-flex align-items-center">
+                                    <label asp-for="MeasurementUnitId" class="col-form-label mr-2" style="min-width: 120px;">Unit:</label>
+                                    <select asp-for="MeasurementUnitId" asp-items="Model.MeasurementUnits" class="form-control custom-dropdown">
+                                    </select>
+                                    <span asp-validation-for="MeasurementUnitId" class="text-danger"></span>
+                                </div>
+                                <!-- Warehouse Selection Field -->
+                                <div class="form-group mb-3 d-flex align-items-center">
+                                    <label asp-for="WarehouseId" class="col-form-label mr-2" style="min-width: 120px;">Warehouse:</label>
+                                    <select asp-for="WarehouseId" asp-items="Model.Warehouses" class="form-control custom-dropdown">
+                                    </select>
+                                    <span asp-validation-for="WarehouseId" class="text-danger"></span>
+                                </div>
+                                <!-- IsActive Checkbox Field -->
+                                <div class="form-group mb-3 d-flex align-items-center ml-md-2">
+                                    <label asp-for="IsActive" class="col-form-label mr-2" style="min-width: 120px;">Active:</label>
+                                    <input type="checkbox" asp-for="IsActive" class="form-check-input ml-1" checked />
+                                    <span asp-validation-for="IsActive" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                        <!-- Second Column -->
+                        <div class="col-md-5 mb-4 ml-auto mr-auto">
+                            <div class="form-group mb-4">
+                                <div class="image-upload item-details-image border rounded p-4" id="dragDropArea">
+                                    <div class="text-center" id="upload">
+                                        <input type="file" accept="image/*" name="ImageFile" id="fileInput" style="display: none;" />
+                                        <div class="d-flex flex-column justify-content-center align-items-center" style="height: 150px;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 472.7 386.4" class="icon icon-35 text-muted mb-2" width="50" height="50">
+                                                <path d="M392 0H81C36 0 0 36 0 81v224a81 81 0 0081 81h311c44 0 81-36 81-81V81c0-45-37-81-81-81zM42 81c0-21 18-39 39-39h311c21 0 39 18 39 39v101l-112 76c-10 7-23 7-33-1l-94-66a72 72 0 00-82 1l-68 48V81zm389 224c0 22-18 39-39 39H81c-21 0-39-17-39-39v-14l92-65c10-7 24-7 34 0l94 66a71 71 0 0081 1l88-60v72z"></path>
+                                                <path d="M301 83a56 56 0 100 113 56 56 0 000-113zm0 78a21 21 0 110-43 21 21 0 010 43z"></path>
+                                            </svg>
+                                            <label class="faded-label text-muted drag-text">Drag image here or</label>
+                                            <span class="text-primary cursor-pointer" style="cursor: pointer;">Browse images</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Image Preview Container -->
+                                <div id="imagePreviewContainer" class="d-flex flex-wrap mt-3" style="padding: 10px; display: none;">
+                                    <!-- Image previews will be inserted here dynamically -->
+                                </div>
+
+                                <button id="clearImages" class="btn btn-danger mt-2" type="button" style="display: none;">Unselect Image</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card footer with submit button -->
+                    <!-- Card footer with submit button -->
+                    <div class="card-footer mt-4 mb-2">
+                        <div class="row">
+                            <div class="col-md-3 col-12">
+                                <button type="submit" class="btn btn-info btn-block">Update Product</button>
+                            </div>
+                            <div class="col-md-9 col-12">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <!-- /.card -->
+            </div>
+            <!--/.col (left) -->
+        </div>
+        <!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const dragDropArea = document.getElementById('dragDropArea');
+        const fileInput = document.getElementById('fileInput');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const clearImagesButton = document.getElementById('clearImages');
+
+        // Open file dialog on clicking the drag and drop area
+        dragDropArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Handle file selection
+        fileInput.addEventListener('change', handleFiles);
+
+        // Handle drag and drop events
+        dragDropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dragDropArea.classList.add('bg-light');
+        });
+
+        dragDropArea.addEventListener('dragleave', () => {
+            dragDropArea.classList.remove('bg-light');
+        });
+
+        dragDropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dragDropArea.classList.remove('bg-light');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFiles();
+            }
+        });
+
+        // Function to handle file preview
+        function handleFiles() {
+            const files = fileInput.files;
+            imagePreviewContainer.innerHTML = '';
+            imagePreviewContainer.style.display = files.length > 0 ? 'flex' : 'none';
+            clearImagesButton.style.display = files.length > 0 ? 'block' : 'none';
+
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    if (!file.type.startsWith('image/')) {
+                        alert('Please upload a valid image file.');
+                        fileInput.value = '';
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'img-thumbnail';
+                        img.style.maxHeight = '200px';
+                        img.style.margin = '5px';
+
+                        imagePreviewContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        // Clear images and reset file input
+        clearImagesButton.addEventListener('click', () => {
+            fileInput.value = '';
+            imagePreviewContainer.innerHTML = '';
+            imagePreviewContainer.style.display = 'none';
+            clearImagesButton.style.display = 'none';
+        });
+
+        // Load existing image on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const existingImageUrl = '@Model.ExistingImagePath'; // Ensure this is set in your model
+            if (existingImageUrl) {
+                const img = document.createElement('img');
+                img.src = existingImageUrl;
+                img.className = 'img-thumbnail';
+                img.style.maxHeight = '200px';
+                img.style.margin = '5px';
+
+                imagePreviewContainer.appendChild(img);
+                imagePreviewContainer.style.display = 'flex';
+                clearImagesButton.style.display = 'block';
+            }
+        });
+    </script>
+}
+ *@
